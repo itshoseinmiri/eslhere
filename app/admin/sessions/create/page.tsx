@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAdmin } from '../../admin-context';
@@ -60,6 +60,14 @@ function getInitials(first: string, last: string) {
 }
 
 export default function CreateSessionPage() {
+  return (
+    <Suspense>
+      <CreateSessionContent />
+    </Suspense>
+  );
+}
+
+function CreateSessionContent() {
   const { token, logout } = useAdmin();
   const router = useRouter();
   const searchParams = useSearchParams();
