@@ -1,0 +1,110 @@
+[
+  {
+    "id": "pay001",
+    "studentId": "a1b2c3d4e5f60001",
+    "amount": 800000,
+    "description": "May 2026 - Private sessions (4x)",
+    "dueDate": "2026-05-01",
+    "paidDate": "2026-05-02",
+    "status": "paid"
+  },
+  {
+    "id": "pay002",
+    "studentId": "a1b2c3d4e5f60001",
+    "amount": 800000,
+    "description": "April 2026 - Private sessions (4x)",
+    "dueDate": "2026-04-01",
+    "paidDate": "2026-04-01",
+    "status": "paid"
+  },
+  {
+    "id": "pay003",
+    "studentId": "a1b2c3d4e5f60002",
+    "amount": 1000000,
+    "description": "May 2026 - Private sessions (4x)",
+    "dueDate": "2026-05-01",
+    "paidDate": "2026-05-03",
+    "status": "paid"
+  },
+  {
+    "id": "pay004",
+    "studentId": "a1b2c3d4e5f60002",
+    "amount": 1000000,
+    "description": "June 2026 - Private sessions (4x)",
+    "dueDate": "2026-06-01",
+    "paidDate": null,
+    "status": "pending"
+  },
+  {
+    "id": "pay005",
+    "studentId": "a1b2c3d4e5f60003",
+    "amount": 450000,
+    "description": "May 2026 - Group sessions (4x)",
+    "dueDate": "2026-05-01",
+    "paidDate": "2026-05-05",
+    "status": "paid"
+  },
+  {
+    "id": "pay006",
+    "studentId": "a1b2c3d4e5f60004",
+    "amount": 450000,
+    "description": "May 2026 - Group sessions (4x)",
+    "dueDate": "2026-05-01",
+    "paidDate": null,
+    "status": "overdue"
+  },
+  {
+    "id": "pay007",
+    "studentId": "a1b2c3d4e5f60005",
+    "amount": 1200000,
+    "description": "May 2026 - Advanced private (4x)",
+    "dueDate": "2026-05-01",
+    "paidDate": "2026-04-30",
+    "status": "paid"
+  },
+  {
+    "id": "pay008",
+    "studentId": "a1b2c3d4e5f60005",
+    "amount": 1200000,
+    "description": "April 2026 - Advanced private (4x)",
+    "dueDate": "2026-04-01",
+    "paidDate": "2026-04-02",
+    "status": "paid"
+  },
+  {
+    "id": "pay009",
+    "studentId": "a1b2c3d4e5f60005",
+    "amount": 1200000,
+    "description": "June 2026 - Advanced private (4x)",
+    "dueDate": "2026-06-01",
+    "paidDate": null,
+    "status": "pending"
+  },
+  {
+    "id": "pay010",
+    "studentId": "a1b2c3d4e5f60006",
+    "amount": 450000,
+    "description": "May 2026 - Group sessions (4x)",
+    "dueDate": "2026-05-01",
+    "paidDate": "2026-05-01",
+    "status": "paid"
+  },
+  {
+    "id": "pay011",
+    "studentId": "a1b2c3d4e5f60007",
+    "amount": 1000000,
+    "description": "May 2026 - Private sessions (4x)",
+    "dueDate": "2026-05-01",
+    "paidDate": null,
+    "status": "pending"
+  },
+  {
+    "id": "pay012",
+    "studentId": "a1b2c3d4e5f60008",
+    "amount": 450000,
+    "description": "May 2026 - Group sessions (4x)",
+    "dueDate": "2026-05-01",
+    "paidDate": "2026-05-08",
+    "status": "paid"
+  }
+]
