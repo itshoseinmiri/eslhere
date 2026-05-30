@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAdmin } from '../../admin-context';
+import { useAdmin } from '../../../admin-context';
 
 const LEVEL_OPTIONS = ['A1\u2013A2', 'A2\u2013B1', 'B1\u2013B2', 'B2\u2013C1', 'C1\u2013C2'];
 
@@ -39,10 +39,14 @@ function resizeImage(file: File, maxW: number, maxH: number): Promise<string> {
   });
 }
 
-export default function CreateDiscussionPage() {
+export default function EditDiscussionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { token, logout } = useAdmin();
   const router = useRouter();
   const thumbInputRef = useRef<HTMLInputElement>(null);
+
+  const [loadingData, setLoadingData] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   const [topic, setTopic] = useState('');
   const [description, setDescription] = useState('');
@@ -63,12 +67,63 @@ export default function CreateDiscussionPage() {
   const [shakeFields, setShakeFields] = useState<string[]>([]);
 
   useEffect(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 7);
-    setDates([{ date: d.toISOString().split('T')[0], time: '18:00' }]);
-  }, []);
+    if (!token) return;
+    (async () => {
+      try {
+        const res = await fetch(`/api/discussions/${id}`, {
+          headers: { Authorization: 'Bearer ' + token },
+        });
+        if (res.status === 401) { logout(); return; }
+        if (res.status === 404) { setNotFound(true); setLoadingData(false); return; }
+        if (!res.ok) throw new Error();
 
-  /* ── Date helpers ── */
+        const d = await res.json();
+        setTopic(d.topic || '');
+        setDescription(d.description || '');
+        setLevel(d.level || '');
+        setDuration(d.duration || '60 min');
+        setThumbnail(d.thumbnail || '');
+        setIsCompleted(d.status === 'completed');
+        setSpots(d.spots || 10);
+        setParticipants(d.participants || 0);
+        setPoints(d.points && d.points.length > 0 ? d.points : ['', '', '']);
+        setReviews(d.reviews && d.reviews.length > 0
+          ? d.reviews.map((r: { name?: string; level?: string; text?: string }) => ({
+              name: r.name || '', level: r.level || '', text: r.text || '',
+            }))
+          : []);
+
+        if (d.dates && d.dates.length > 0) {
+          setDates(d.dates.map((entry: { date: string; time?: string }) => ({
+            date: parseDateToInput(entry.date),
+            time: entry.time || '18:00',
+          })));
+        } else if (d.date) {
+          setDates([{ date: parseDateToInput(d.date), time: d.time || '18:00' }]);
+        }
+      } catch {
+        setNotFound(true);
+      }
+      setLoadingData(false);
+    })();
+  }, [token, id]);
+
+  function parseDateToInput(dateStr: string): string {
+    try {
+      const currentYear = new Date().getFullYear();
+      const attempt = new Date(`${dateStr} ${currentYear}`);
+      if (!isNaN(attempt.getTime())) {
+        return attempt.toISOString().split('T')[0];
+      }
+      const direct = new Date(dateStr);
+      if (!isNaN(direct.getTime())) {
+        return direct.toISOString().split('T')[0];
+      }
+    } catch { /* fallthrough */ }
+    return dateStr;
+  }
+
+  /* -- Date helpers -- */
   function addDateEntry() {
     setDates(prev => [...prev, { date: '', time: '18:00' }]);
   }
@@ -80,7 +135,7 @@ export default function CreateDiscussionPage() {
     if (errors.dates) setErrors(prev => { const { dates: _, ...rest } = prev; return rest; });
   }
 
-  /* ── Thumbnail helpers ── */
+  /* -- Thumbnail helpers -- */
   async function handleThumbnailFile(file: File) {
     if (!file.type.startsWith('image/')) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -96,12 +151,12 @@ export default function CreateDiscussionPage() {
     }
   }
 
-  /* ── Point helpers ── */
+  /* -- Point helpers -- */
   function addPoint() { setPoints(prev => [...prev, '']); }
   function removePoint(idx: number) { setPoints(prev => prev.filter((_, i) => i !== idx)); }
   function updatePoint(idx: number, val: string) { setPoints(prev => prev.map((p, i) => i === idx ? val : p)); }
 
-  /* ── Review helpers ── */
+  /* -- Review helpers -- */
   function addReview() { setReviews(prev => [...prev, { name: '', level: '', text: '' }]); }
   function removeReview(idx: number) { setReviews(prev => prev.filter((_, i) => i !== idx)); }
   function updateReview(idx: number, field: 'name' | 'level' | 'text', val: string) {
@@ -169,14 +224,14 @@ export default function CreateDiscussionPage() {
         level,
         dates: dateEntries,
         duration,
-        ...(thumbnail ? { thumbnail } : {}),
+        thumbnail: thumbnail || undefined,
         ...(isCompleted
-          ? { status: 'completed', participants, ...(cleanedReviews.length > 0 ? { reviews: cleanedReviews } : {}) }
-          : { spots, points: filteredPoints.length > 0 ? filteredPoints : undefined }),
+          ? { status: 'completed', participants, reviews: cleanedReviews }
+          : { status: 'upcoming', spots, points: filteredPoints.length > 0 ? filteredPoints : undefined, reviews: [] }),
       };
 
-      const res = await fetch('/api/discussions', {
-        method: 'POST',
+      const res = await fetch(`/api/discussions/${id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
         body: JSON.stringify(payload),
       });
@@ -185,14 +240,14 @@ export default function CreateDiscussionPage() {
       if (!res.ok) throw new Error();
 
       setSubmitted(true);
-      setTimeout(() => router.push('/admin/discussions'), 1600);
+      setTimeout(() => router.push('/admin/manage-discussions'), 1600);
     } catch {
       setErrors({ submit: 'Something went wrong. Please try again.' });
     }
     setSubmitting(false);
   }
 
-  /* ── Preview computation ── */
+  /* -- Preview computation -- */
   const previewDates = dates.filter(d => d.date).map(d => {
     try {
       const dt = new Date(`${d.date}T${d.time || '00:00'}`);
@@ -207,10 +262,78 @@ export default function CreateDiscussionPage() {
 
   const errorIcon = <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
 
+  if (loadingData) {
+    return (
+      <>
+        <style jsx global>{`
+          @keyframes ed-pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+          .ed-loading {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 400px; gap: 16px;
+          }
+          .ed-loading-spinner {
+            width: 36px; height: 36px; border: 3px solid #e8eef3;
+            border-top-color: #2db5c0; border-radius: 50%;
+            animation: cd-spin 0.7s linear infinite;
+          }
+          @keyframes cd-spin { to { transform: rotate(360deg); } }
+          .ed-loading-text {
+            font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+            color: #94a7b5; animation: ed-pulse 1.5s ease infinite;
+          }
+        `}</style>
+        <div className="ed-loading">
+          <div className="ed-loading-spinner" />
+          <div className="ed-loading-text">Loading discussion...</div>
+        </div>
+      </>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <>
+        <style jsx global>{`
+          .ed-notfound {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 400px; gap: 16px; text-align: center;
+          }
+          .ed-notfound-icon {
+            width: 56px; height: 56px; border-radius: 50%; background: #fef2f2;
+            display: flex; align-items: center; justify-content: center;
+          }
+          .ed-notfound-icon svg {
+            width: 26px; height: 26px; stroke: #ef4444; stroke-width: 2; fill: none;
+            stroke-linecap: round; stroke-linejoin: round;
+          }
+          .ed-notfound-title {
+            font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 600; color: #1a2e44;
+          }
+          .ed-notfound-hint { font-size: 0.84rem; color: #94a7b5; }
+          .ed-back-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 9px 22px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 600;
+            color: #fff; background: #2db5c0; border: none; border-radius: 8px;
+            cursor: pointer; text-decoration: none; transition: all 0.15s; margin-top: 8px;
+          }
+          .ed-back-btn:hover { background: #2a6270; }
+        `}</style>
+        <div className="ed-notfound">
+          <div className="ed-notfound-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div className="ed-notfound-title">Discussion not found</div>
+          <div className="ed-notfound-hint">This discussion may have been deleted or the link is incorrect.</div>
+          <Link href="/admin/manage-discussions" className="ed-back-btn">Back to Discussions</Link>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <style jsx global>{`
-        /* ── Create Discussion ── */
+        /* -- Edit Discussion (reuses cd- prefix from create) -- */
         @keyframes cd-page-in { from { opacity: 0; } to { opacity: 1; } }
         @keyframes cd-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
         @keyframes cd-shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-4px); } 40%,80% { transform: translateX(4px); } }
@@ -323,7 +446,7 @@ export default function CreateDiscussionPage() {
         .cd-toggle-label { font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 600; color: #1a2e44; }
         .cd-toggle-hint { font-size: 0.72rem; color: #94a7b5; margin-top: 1px; }
 
-        /* ── Multi-date entries ── */
+        /* -- Multi-date entries -- */
         .cd-date-entries { display: flex; flex-direction: column; gap: 10px; }
         .cd-date-entry {
           display: flex; gap: 10px; align-items: center;
@@ -356,7 +479,7 @@ export default function CreateDiscussionPage() {
         .cd-date-add:hover { color: #2a6270; }
         .cd-date-add svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
 
-        /* ── Thumbnail upload ── */
+        /* -- Thumbnail upload -- */
         .cd-thumb-zone {
           border: 2px dashed #d8e3ec; border-radius: 10px;
           cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
@@ -510,23 +633,23 @@ export default function CreateDiscussionPage() {
       <div className="cd-page">
         {/* Breadcrumb */}
         <div className="cd-breadcrumb">
-          <Link href="/admin/discussions">Discussion Enrollments</Link>
+          <Link href="/admin/manage-discussions">Manage Discussions</Link>
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-          <span>Create Discussion</span>
+          <span>Edit Discussion</span>
         </div>
 
         {/* Header */}
         <div className="cd-header">
           <div>
-            <div className="cd-title">Create Discussion</div>
-            <div className="cd-subtitle">Set up a new discussion session for students to join</div>
+            <div className="cd-title">Edit Discussion</div>
+            <div className="cd-subtitle">Update the details of this discussion session</div>
           </div>
-          <Link href="/admin/discussions" className="cd-cancel-btn">Cancel</Link>
+          <Link href="/admin/manage-discussions" className="cd-cancel-btn">Cancel</Link>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="cd-grid">
-            {/* Left column — Form */}
+            {/* Left column -- Form */}
             <div>
               {/* Topic & Description */}
               <div className="cd-card">
@@ -610,7 +733,7 @@ export default function CreateDiscussionPage() {
                 </div>
                 <div className="cd-toggle-text">
                   <div className="cd-toggle-label">Already completed</div>
-                  <div className="cd-toggle-hint">Check this to add a past discussion that has already taken place</div>
+                  <div className="cd-toggle-hint">Check this to mark this discussion as completed</div>
                 </div>
               </div>
 
@@ -746,7 +869,7 @@ export default function CreateDiscussionPage() {
               )}
             </div>
 
-            {/* Right column — Preview */}
+            {/* Right column -- Preview */}
             <div className="cd-preview">
               <div className="cd-preview-head">Preview</div>
               {thumbnail && <img src={thumbnail} alt="Preview thumbnail" className="cd-preview-thumb" />}
@@ -833,7 +956,7 @@ export default function CreateDiscussionPage() {
               </div>
               <div className="cd-preview-footer">
                 <button type="submit" className="cd-submit" disabled={submitting}>
-                  {submitting ? <><div className="cd-spinner" /> Creating...</> : 'Create Discussion'}
+                  {submitting ? <><div className="cd-spinner" /> Saving...</> : 'Save Changes'}
                 </button>
               </div>
             </div>
@@ -847,7 +970,7 @@ export default function CreateDiscussionPage() {
             <div className="cd-success-icon">
               <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <div className="cd-success-title">Discussion Created</div>
+            <div className="cd-success-title">Discussion Updated</div>
             <div className="cd-success-hint">Redirecting to discussions...</div>
           </div>
         </div>

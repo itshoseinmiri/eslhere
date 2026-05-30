@@ -202,23 +202,29 @@ body::before {
 .disc-divider-line { width: 40px; height: 1.5px; background: var(--border); border-radius: 1px; }
 .disc-divider-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
 .disc-empty { text-align: center; padding: 48px 20px; color: var(--text-light); font-size: 0.84rem; font-weight: 300; }
+.disc-card-thumb { width: 100%; height: 160px; object-fit: cover; display: block; }
+.disc-card.disc-upcoming .disc-card-thumb + .disc-card-inner { border-top: none; }
+.disc-card.disc-completed .disc-card-thumb + .disc-card-inner { border-top: none; }
+.disc-date-more { display: inline-block; margin-left: 5px; padding: 1px 7px; border-radius: 4px; font-size: 0.62rem; font-weight: 600; background: #fef0e9; color: #c86d3e; vertical-align: middle; }
 
 /* ── Discussion Detail ── */
 .dt-wrap { width: 100%; max-width: 1000px; position: relative; z-index: 1; margin-top: 20px; padding: 0 24px 40px; }
 .dt-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
-.dt-info { background: linear-gradient(145deg, #fdf6f0 0%, #f7ede3 50%, #faf5ef 100%); border-radius: 22px; padding: 36px 32px; position: relative; overflow: hidden; animation: fadeUp 0.5s ease-out both; }
-.dt-info::before { content: ''; position: absolute; top: -40px; right: -30px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(232,135,91,0.08) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
-.dt-info::after { content: ''; position: absolute; bottom: -30px; left: -20px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(240,207,138,0.10) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
-.dt-info-label { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; color: #c86d3e; margin-bottom: 20px; position: relative; z-index: 1; }
-.dt-title { font-family: 'Poppins', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1.3; letter-spacing: -0.5px; margin-bottom: 16px; position: relative; z-index: 1; }
+.dt-info { background: #fff; border-radius: 22px; padding: 0; position: relative; overflow: hidden; animation: fadeUp 0.5s ease-out both; border: 1px solid #edf2f7; }
+.dt-info-content { padding: 36px 32px; position: relative; }
+.dt-thumb-wrap { position: relative; }
+.dt-thumb { width: 100%; height: 240px; object-fit: cover; display: block; }
+.dt-thumb-wrap::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, #fff); pointer-events: none; }
+.dt-info-label { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; color: #c86d3e; margin-bottom: 20px; }
+.dt-title { font-family: 'Poppins', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1.3; letter-spacing: -0.5px; margin-bottom: 16px; }
 .dt-short-divider { width: 40px; height: 3px; border-radius: 3px; background: #e8875b; margin-bottom: 20px; }
-.dt-meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; position: relative; z-index: 1; }
+.dt-meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
 .dt-meta-tag { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: rgba(255,255,255,0.7); border-radius: 10px; font-size: 0.74rem; color: var(--text); font-weight: 400; backdrop-filter: blur(4px); }
 .dt-meta-tag svg { width: 14px; height: 14px; stroke: #c86d3e; stroke-width: 1.5; fill: none; }
 .dt-spots-tag { color: #c86d3e; font-weight: 500; }
-.dt-level-badge { display: inline-block; padding: 4px 14px; background: #fef0e9; color: #c86d3e; font-size: 0.72rem; font-weight: 500; border-radius: 8px; letter-spacing: 0.5px; margin-bottom: 20px; position: relative; z-index: 1; }
-.dt-desc { font-size: 0.84rem; color: var(--text-light); font-weight: 300; line-height: 1.7; margin-bottom: 28px; position: relative; z-index: 1; }
-.dt-points { position: relative; z-index: 1; }
+.dt-level-badge { display: inline-block; padding: 4px 14px; background: #fef0e9; color: #c86d3e; font-size: 0.72rem; font-weight: 500; border-radius: 8px; letter-spacing: 0.5px; margin-bottom: 20px; }
+.dt-desc { font-size: 0.84rem; color: var(--text-light); font-weight: 300; line-height: 1.7; margin-bottom: 28px; }
+.dt-points { }
 .dt-points h3 { font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
 .dt-points ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
 .dt-points li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: var(--text); font-weight: 400; line-height: 1.5; opacity: 0; animation: fadeIn 0.5s ease-out forwards; }
@@ -230,6 +236,46 @@ body::before {
 .dt-submit-btn { background: #e8875b !important; }
 .dt-submit-btn:hover { background: #d4744a !important; box-shadow: 0 6px 20px rgba(232,135,91,0.25) !important; }
 .dt-form-panel .success-icon svg { stroke: #e8875b; }
+
+/* ── Completed discussion cards ── */
+.disc-reviews-count { color: #059669 !important; }
+.disc-reviews-count svg { stroke: #10b981; stroke-width: 1.8; fill: none; }
+.disc-view-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; font-size: 0.72rem; font-weight: 500; color: #059669; background: #ecfdf5; border-radius: 8px; flex-shrink: 0; transition: all 0.25s ease; }
+.disc-view-btn svg { width: 12px; height: 12px; stroke: #10b981; stroke-width: 2.5; fill: none; transition: transform 0.25s ease; }
+.disc-completed:hover .disc-view-btn { background: #10b981; color: #fff; }
+.disc-completed:hover .disc-view-btn svg { stroke: #fff; transform: translateX(3px); }
+
+/* ── Completed discussion detail ── */
+.dt-info-completed { border-color: #d9f2e7; }
+.dt-info-label-done { color: #059669 !important; }
+.dt-done-check { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #ecfdf5; }
+.dt-done-check svg { width: 11px; height: 11px; stroke: #10b981; stroke-width: 2.5; fill: none; }
+.dt-info-completed .dt-short-divider { background: #10b981; }
+.dt-info-completed .dt-level-badge { background: #ecfdf5; color: #059669; }
+.dt-info-completed .dt-meta-tag svg { stroke: #10b981; }
+.dt-joined-tag { color: #059669; font-weight: 500; }
+
+.dt-reviews-panel { position: relative; background: #fff; border-radius: 22px; padding: 30px 30px 12px; box-shadow: 0 2px 24px rgba(26,46,68,0.06); border: 1px solid #eef3f1; animation: fadeUp 0.6s ease-out 0.12s both; align-self: start; overflow: hidden; }
+.dt-reviews-panel::before { content: '\201C'; position: absolute; top: -28px; right: 14px; font-family: 'Poppins', serif; font-size: 9rem; line-height: 1; color: #f0f6f3; pointer-events: none; user-select: none; }
+.dt-reviews-head { position: relative; margin-bottom: 22px; }
+.dt-reviews-eyebrow { display: block; font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #10b981; margin-bottom: 7px; }
+.dt-reviews-head h2 { font-family: 'Poppins', sans-serif; font-size: 1.35rem; font-weight: 600; color: var(--text); letter-spacing: -0.4px; }
+.dt-rev-count { display: inline-block; font-size: 0.74rem; font-weight: 500; color: #0f9d6b; background: #ebf8f2; border: 1px solid #d9f0e6; padding: 4px 12px; border-radius: 20px; margin-bottom: 4px; }
+
+/* Review list — clean editorial rows */
+.dt-rev-list { display: flex; flex-direction: column; }
+.dt-rev-card { position: relative; display: flex; gap: 14px; padding: 20px 0; border-bottom: 1px solid #f1f5f3; opacity: 0; animation: fadeUp 0.5s ease-out forwards; }
+.dt-rev-card:last-child { border-bottom: none; }
+.dt-rev-avatar { width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-size: 1.05rem; font-weight: 600; color: #0f9d6b; background: #ebf8f2; border: 1px solid #d9f0e6; }
+.dt-rev-body { flex: 1; min-width: 0; }
+.dt-rev-head-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.dt-rev-id { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+.dt-rev-name { font-family: 'Poppins', sans-serif; font-size: 0.92rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+.dt-rev-level { display: inline-block; padding: 2px 9px; font-size: 0.64rem; font-weight: 600; letter-spacing: 0.4px; color: #2a6270; background: var(--accent-soft); border-radius: 20px; }
+.dt-rev-text { font-size: 0.86rem; color: var(--text-light); font-weight: 300; line-height: 1.72; margin: 0; }
+.dt-rev-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 30px 20px 42px; color: var(--text-light); }
+.dt-rev-empty svg { width: 40px; height: 40px; stroke: #cfe6dc; stroke-width: 1.5; fill: none; }
+.dt-rev-empty p { font-size: 0.84rem; font-weight: 300; line-height: 1.6; max-width: 260px; }
 
 @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -266,6 +312,7 @@ body::before {
   .footer-cta { padding: 0 12px; }
   .disc-wrap { padding: 0 16px 32px; }
   .disc-header h1 { font-size: 1.6rem; }
+  .dt-layout { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
   .selection-boxes { padding: 0 16px; gap: 16px; }
@@ -345,7 +392,9 @@ body::before {
   .disc-section { margin-bottom: 32px; }
   .disc-section-head { margin-bottom: 16px; padding-bottom: 10px; }
   .disc-section-head h2 { font-size: 1rem; }
-  .disc-card { padding: 20px 16px; border-radius: 14px; }
+  .disc-card { padding: 0; border-radius: 14px; }
+  .disc-card-thumb { height: 130px; }
+  .dt-thumb { height: 180px; }
   .disc-watermark { font-size: 2.5rem; }
   .disc-topic { font-size: 0.95rem; }
   .disc-desc { font-size: 0.74rem; margin-bottom: 14px; }

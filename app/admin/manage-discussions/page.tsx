@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../admin-context';
 
 interface Discussion {
   id: number;
   topic: string;
-  date: string;
+  date?: string;
   time?: string;
+  dates?: { date: string; time?: string }[];
   level: string;
   description: string;
   spots?: number;
@@ -17,28 +19,18 @@ interface Discussion {
   duration: string;
   points?: string[];
   status: string;
+  thumbnail?: string;
 }
 
 export default function ManageDiscussionsPage() {
   const { token, logout } = useAdmin();
+  const router = useRouter();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [loading, setLoading] = useState(true);
   const [openMenu, setOpenMenu] = useState<{ idx: number; top: number; left: number } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Discussion | null>(null);
-  const [editModal, setEditModal] = useState<Discussion | null>(null);
   const [toast, setToast] = useState('');
   const [tab, setTab] = useState<'all' | 'upcoming' | 'completed'>('all');
-
-  // Edit form state
-  const [editTopic, setEditTopic] = useState('');
-  const [editDesc, setEditDesc] = useState('');
-  const [editLevel, setEditLevel] = useState('');
-  const [editDate, setEditDate] = useState('');
-  const [editTime, setEditTime] = useState('');
-  const [editDuration, setEditDuration] = useState('');
-  const [editSpots, setEditSpots] = useState(0);
-  const [editParticipants, setEditParticipants] = useState(0);
-  const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -78,51 +70,6 @@ export default function ManageDiscussionsPage() {
     setDeleteConfirm(null);
   }
 
-  function openEdit(d: Discussion) {
-    setEditTopic(d.topic);
-    setEditDesc(d.description);
-    setEditLevel(d.level);
-    setEditDate(d.date);
-    setEditTime(d.time || '');
-    setEditDuration(d.duration);
-    setEditSpots(d.spots || 0);
-    setEditParticipants(d.participants || 0);
-    setEditModal(d);
-  }
-
-  async function handleEditSave() {
-    if (!editModal || !editTopic.trim() || !editDesc.trim()) return;
-    setEditSaving(true);
-    try {
-      const body: Record<string, unknown> = {
-        topic: editTopic.trim(),
-        description: editDesc.trim(),
-        level: editLevel,
-        date: editDate,
-        duration: editDuration,
-      };
-      if (editModal.status === 'upcoming') {
-        body.time = editTime;
-        body.spots = editSpots;
-      } else {
-        body.participants = editParticipants;
-      }
-      const res = await fetch(`/api/discussions/${editModal.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify(body),
-      });
-      if (res.status === 401) { logout(); return; }
-      if (res.ok) {
-        const updated = await res.json();
-        setDiscussions(prev => prev.map(d => d.id === updated.id ? updated : d));
-        showToast('Discussion updated');
-        setEditModal(null);
-      }
-    } catch { showToast('Failed to update'); }
-    setEditSaving(false);
-  }
-
   const filtered = tab === 'all' ? discussions : discussions.filter(d => d.status === tab);
 
   return (
@@ -160,9 +107,27 @@ export default function ManageDiscussionsPage() {
         .md-table tr:last-child td { border-bottom: none; }
         .md-table tr:hover td { background: #fafcfd; transition: background 0.15s; }
 
+        .md-topic-cell { display: flex; align-items: center; gap: 12px; }
+        .md-thumb {
+          width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+          border: 1px solid #f0f3f6;
+        }
+        .md-thumb-placeholder {
+          width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+          background: #f5f8fa; border: 1px solid #f0f3f6;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .md-thumb-placeholder svg {
+          width: 18px; height: 18px; stroke: #b0bfcc; stroke-width: 1.5; fill: none;
+          stroke-linecap: round; stroke-linejoin: round;
+        }
         .md-topic { font-weight: 600; color: #1a2e44; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; }
         .md-topic-desc { font-size: 0.72rem; color: #94a7b5; margin-top: 2px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .md-level { display: inline-flex; padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; font-weight: 500; background: #f5f8fa; color: #5f7a8f; }
+        .md-date-more {
+          display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 4px;
+          font-size: 0.66rem; font-weight: 600; background: #edf9fa; color: #2a6270;
+        }
         .md-status {
           display: inline-flex; align-items: center; gap: 5px;
           padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; font-weight: 600;
@@ -327,14 +292,36 @@ export default function ManageDiscussionsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((d, i) => (
+              {filtered.map((d, i) => {
+                const displayDates = d.dates && d.dates.length > 0 ? d.dates : (d.date ? [{ date: d.date, time: d.time }] : []);
+                return (
                 <tr key={d.id}>
                   <td>
-                    <div className="md-topic">{d.topic}</div>
-                    <div className="md-topic-desc">{d.description}</div>
+                    <div className="md-topic-cell">
+                      {d.thumbnail ? (
+                        <img src={d.thumbnail} alt="" className="md-thumb" />
+                      ) : (
+                        <div className="md-thumb-placeholder">
+                          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        </div>
+                      )}
+                      <div>
+                        <div className="md-topic">{d.topic}</div>
+                        <div className="md-topic-desc">{d.description}</div>
+                      </div>
+                    </div>
                   </td>
                   <td><span className="md-level">{d.level}</span></td>
-                  <td><span className="md-date">{d.date}{d.time ? ` · ${d.time}` : ''}</span></td>
+                  <td>
+                    {displayDates.length > 0 ? (
+                      <span className="md-date">
+                        {displayDates[0].date}{displayDates[0].time ? ` · ${displayDates[0].time}` : ''}
+                        {displayDates.length > 1 && <span className="md-date-more">+{displayDates.length - 1}</span>}
+                      </span>
+                    ) : (
+                      <span className="md-date">—</span>
+                    )}
+                  </td>
                   <td><span className="md-date">{d.duration}</span></td>
                   <td><span className={`md-status ${d.status}`}>{d.status === 'upcoming' ? 'Upcoming' : 'Completed'}</span></td>
                   <td>
@@ -351,7 +338,8 @@ export default function ManageDiscussionsPage() {
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -369,7 +357,7 @@ export default function ManageDiscussionsPage() {
             if (!d) return null;
             return (
               <>
-                <button className="md-drop-item" onClick={() => { setOpenMenu(null); openEdit(d); }}>
+                <button className="md-drop-item" onClick={() => { setOpenMenu(null); router.push(`/admin/manage-discussions/edit/${d.id}`); }}>
                   <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Edit
                 </button>
@@ -407,78 +395,6 @@ export default function ManageDiscussionsPage() {
             <div className="md-modal-footer">
               <button className="md-btn-cancel" onClick={() => setDeleteConfirm(null)}>Cancel</button>
               <button className="md-btn-delete" onClick={() => handleDelete(deleteConfirm)}>Delete</button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Edit modal */}
-      {editModal && typeof document !== 'undefined' && createPortal(
-        <div className="md-overlay" onMouseDown={() => setEditModal(null)}>
-          <div className="md-modal" style={{ maxWidth: 500 }} onMouseDown={e => e.stopPropagation()}>
-            <div className="md-modal-head">
-              <div className="md-modal-title">Edit Discussion</div>
-              <button className="md-modal-close" onClick={() => setEditModal(null)}>
-                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-            <div className="md-modal-body">
-              <div className="md-field">
-                <label className="md-field-label">Topic</label>
-                <input className="md-field-input" value={editTopic} onChange={e => setEditTopic(e.target.value)} />
-              </div>
-              <div className="md-field">
-                <label className="md-field-label">Description</label>
-                <textarea className="md-field-textarea" value={editDesc} onChange={e => setEditDesc(e.target.value)} />
-              </div>
-              <div className="md-field-row">
-                <div className="md-field">
-                  <label className="md-field-label">Level</label>
-                  <select className="md-field-select" value={editLevel} onChange={e => setEditLevel(e.target.value)}>
-                    {['A1–A2', 'A2–B1', 'B1–B2', 'B2–C1', 'C1–C2'].map(l => (
-                      <option key={l} value={l}>{l}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md-field">
-                  <label className="md-field-label">Duration</label>
-                  <select className="md-field-select" value={editDuration} onChange={e => setEditDuration(e.target.value)}>
-                    {['45 min', '60 min', '90 min'].map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="md-field-row">
-                <div className="md-field">
-                  <label className="md-field-label">Date</label>
-                  <input className="md-field-input" value={editDate} onChange={e => setEditDate(e.target.value)} placeholder="Jun 3" />
-                </div>
-                {editModal.status === 'upcoming' ? (
-                  <div className="md-field">
-                    <label className="md-field-label">Time</label>
-                    <input className="md-field-input" value={editTime} onChange={e => setEditTime(e.target.value)} placeholder="18:00" />
-                  </div>
-                ) : (
-                  <div className="md-field">
-                    <label className="md-field-label">Participants</label>
-                    <input type="number" className="md-field-input" value={editParticipants} min={0} onChange={e => setEditParticipants(Number(e.target.value))} />
-                  </div>
-                )}
-              </div>
-              {editModal.status === 'upcoming' && (
-                <div className="md-field">
-                  <label className="md-field-label">Available Spots</label>
-                  <input type="number" className="md-field-input" value={editSpots} min={0} max={50} onChange={e => setEditSpots(Number(e.target.value))} style={{ maxWidth: 100 }} />
-                </div>
-              )}
-            </div>
-            <div className="md-modal-footer">
-              <button className="md-btn-cancel" onClick={() => setEditModal(null)}>Cancel</button>
-              <button className="md-btn-save" disabled={editSaving || !editTopic.trim()} onClick={handleEditSave}>
-                {editSaving ? 'Saving...' : 'Save Changes'}
-              </button>
             </div>
           </div>
         </div>,

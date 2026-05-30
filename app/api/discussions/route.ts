@@ -4,8 +4,9 @@ import { readJsonFile, writeJsonFile } from '@/lib/data';
 interface Discussion {
   id: number;
   topic: string;
-  date: string;
+  date?: string;
   time?: string;
+  dates?: { date: string; time?: string }[];
   level: string;
   description: string;
   spots?: number;
@@ -13,6 +14,8 @@ interface Discussion {
   duration: string;
   points?: string[];
   status: string;
+  thumbnail?: string;
+  reviews?: { name: string; level?: string; text: string }[];
 }
 
 export async function GET() {
@@ -31,9 +34,9 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { topic, date, time, level, description, spots, duration, points, status, participants } = body;
+    const { topic, date, time, dates, level, description, spots, duration, points, status, participants, thumbnail, reviews } = body;
 
-    if (!topic || !date || !level || !description || !duration) {
+    if (!topic || (!date && (!dates || dates.length === 0)) || !level || !description || !duration) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -44,7 +47,8 @@ export async function POST(request: Request) {
     const newDiscussion: Discussion = {
       id: nextId,
       topic: topic.trim(),
-      date,
+      ...(dates && dates.length > 0 ? { dates } : {}),
+      ...(date && !dates ? { date } : {}),
       ...(time ? { time } : {}),
       level,
       description: description.trim(),
@@ -53,6 +57,8 @@ export async function POST(request: Request) {
       duration,
       ...(points && points.length > 0 ? { points } : {}),
       status: status || 'upcoming',
+      ...(thumbnail ? { thumbnail } : {}),
+      ...(reviews && reviews.length > 0 ? { reviews } : {}),
     };
 
     discussions.push(newDiscussion);

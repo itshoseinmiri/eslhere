@@ -39,7 +39,7 @@ function HomeContent() {
     }
   }, [searchParams]);
 
-  const [allDiscussions, setAllDiscussions] = useState<{ id: number; topic: string; date: string; time?: string; level: string; description: string; spots?: number; participants?: number; duration: string; points?: string[]; status: string }[]>([]);
+  const [allDiscussions, setAllDiscussions] = useState<{ id: number; topic: string; date?: string; time?: string; dates?: { date: string; time?: string }[]; level: string; description: string; spots?: number; participants?: number; duration: string; points?: string[]; status: string; thumbnail?: string; reviews?: { name: string; level?: string; text: string }[] }[]>([]);
 
   useEffect(() => {
     fetch('/api/discussions')
@@ -185,7 +185,8 @@ function HomeContent() {
     }
   }
 
-  const activeDisc = upcomingDiscussions.find(d => d.id === selectedDisc);
+  const activeDisc = allDiscussions.find(d => d.id === selectedDisc);
+  const isCompletedDetail = activeDisc?.status === 'completed';
 
   return (
     <>
@@ -393,15 +394,19 @@ function HomeContent() {
               <div className="disc-empty">No upcoming discussions scheduled yet</div>
             ) : (
               <div className="disc-grid">
-                {upcomingDiscussions.map((d, i) => (
+                {upcomingDiscussions.map((d, i) => {
+                  const discDates = d.dates && d.dates.length > 0 ? d.dates : (d.date ? [{ date: d.date, time: d.time }] : []);
+                  return (
                   <div key={d.id} className="disc-card disc-upcoming" style={{ animationDelay: `${0.1 + i * 0.1}s`, cursor: 'pointer' }} onClick={() => openDetail(d.id)}>
+                    {d.thumbnail && <img src={d.thumbnail} alt="" className="disc-card-thumb" />}
                     <div className="disc-card-inner">
                       <span className="disc-watermark">{String(i + 1).padStart(2, '0')}</span>
                       <div className="disc-card-top">
                         <span className="disc-level">{d.level}</span>
                         <span className="disc-date">
                           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                          {d.date}{d.time ? ` · ${d.time}` : ''}
+                          {discDates[0]?.date}{discDates[0]?.time ? ` \u00b7 ${discDates[0].time}` : ''}
+                          {discDates.length > 1 && <span className="disc-date-more">+{discDates.length - 1}</span>}
                         </span>
                       </div>
                       <h3 className="disc-topic">{d.topic}</h3>
@@ -424,7 +429,8 @@ function HomeContent() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -447,15 +453,19 @@ function HomeContent() {
               <div className="disc-empty">No completed discussions yet</div>
             ) : (
               <div className="disc-grid">
-                {completedDiscussions.map((d, i) => (
-                  <div key={d.id} className="disc-card disc-completed" style={{ animationDelay: `${0.15 + i * 0.08}s` }}>
+                {completedDiscussions.map((d, i) => {
+                  const discDates = d.dates && d.dates.length > 0 ? d.dates : (d.date ? [{ date: d.date, time: d.time }] : []);
+                  return (
+                  <div key={d.id} className="disc-card disc-completed" style={{ animationDelay: `${0.15 + i * 0.08}s`, cursor: 'pointer' }} onClick={() => openDetail(d.id)}>
+                    {d.thumbnail && <img src={d.thumbnail} alt="" className="disc-card-thumb" />}
                     <div className="disc-card-inner">
                       <span className="disc-watermark">{String(i + 1).padStart(2, '0')}</span>
                       <div className="disc-card-top">
                         <span className="disc-level">{d.level}</span>
                         <span className="disc-date">
                           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                          {d.date}
+                          {discDates[0]?.date || '\u2014'}
+                          {discDates.length > 1 && <span className="disc-date-more">+{discDates.length - 1}</span>}
                         </span>
                       </div>
                       <h3 className="disc-topic">{d.topic}</h3>
@@ -470,15 +480,22 @@ function HomeContent() {
                             <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             {d.participants ?? 0} joined
                           </span>
+                          {d.reviews && d.reviews.length > 0 && (
+                            <span className="disc-meta-item disc-reviews-count">
+                              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              {d.reviews.length} {d.reviews.length === 1 ? 'review' : 'reviews'}
+                            </span>
+                          )}
                         </div>
-                        <span className="disc-done-badge">
-                          <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          Done
+                        <span className="disc-view-btn">
+                          View
+                          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </span>
                       </div>
                     </div>
                   </div>
-              ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -487,45 +504,107 @@ function HomeContent() {
 
       {/* Discussion Detail View */}
       <div className={`view ${view === 'detail' ? 'active' : ''}`}>
-        {activeDisc && (
+        {activeDisc && (() => {
+          const detailDates = activeDisc.dates && activeDisc.dates.length > 0
+            ? activeDisc.dates
+            : (activeDisc.date ? [{ date: activeDisc.date, time: activeDisc.time }] : []);
+          const reviews = activeDisc.reviews || [];
+          return (
           <div className="dt-wrap">
             <button className="back-btn" onClick={() => { setView('discussions'); setEnrollSuccess(false); window.history.pushState(null, '', '/discussions'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
               <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Discussions
             </button>
-            <div className="dt-layout">
-              <div className="dt-info">
-                <div className="dt-info-label">
-                  <span className="disc-pulse"></span>
-                  <span>Upcoming Session</span>
-                </div>
-                <h1 className="dt-title">{activeDisc.topic}</h1>
-                <div className="dt-short-divider"></div>
-                <div className="dt-meta-row">
-                  <span className="dt-meta-tag">
-                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    {activeDisc.date}{activeDisc.time ? ` · ${activeDisc.time}` : ''}
-                  </span>
-                  <span className="dt-meta-tag">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    {activeDisc.duration}
-                  </span>
-                  <span className="dt-meta-tag dt-spots-tag">
-                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    {activeDisc.spots ?? 0} spots left
-                  </span>
-                </div>
-                <span className="dt-level-badge">{activeDisc.level}</span>
-                <p className="dt-desc">{activeDisc.description}</p>
-                <div className="dt-points">
-                  <h3>What you&apos;ll discuss</h3>
-                  <ul>
-                    {(activeDisc.points || []).map((p, i) => (
-                      <li key={i} style={{ animationDelay: `${0.3 + i * 0.1}s` }}>{p}</li>
+            <div className={`dt-layout${isCompletedDetail ? ' dt-layout-completed' : ''}`}>
+              <div className={`dt-info${isCompletedDetail ? ' dt-info-completed' : ''}`}>
+                {activeDisc.thumbnail && <div className="dt-thumb-wrap"><img src={activeDisc.thumbnail} alt="" className="dt-thumb" /></div>}
+                <div className="dt-info-content">
+                  {isCompletedDetail ? (
+                    <div className="dt-info-label dt-info-label-done">
+                      <span className="dt-done-check">
+                        <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </span>
+                      <span>Completed Session</span>
+                    </div>
+                  ) : (
+                    <div className="dt-info-label">
+                      <span className="disc-pulse"></span>
+                      <span>Upcoming Session</span>
+                    </div>
+                  )}
+                  <h1 className="dt-title">{activeDisc.topic}</h1>
+                  <div className="dt-short-divider"></div>
+                  <div className="dt-meta-row">
+                    {detailDates.map((dd, i) => (
+                      <span key={i} className="dt-meta-tag">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        {dd.date}{dd.time ? ` \u00b7 ${dd.time}` : ''}
+                      </span>
                     ))}
-                  </ul>
+                    <span className="dt-meta-tag">
+                      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      {activeDisc.duration}
+                    </span>
+                    {isCompletedDetail ? (
+                      <span className="dt-meta-tag dt-joined-tag">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        {activeDisc.participants ?? 0} joined
+                      </span>
+                    ) : (
+                      <span className="dt-meta-tag dt-spots-tag">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        {activeDisc.spots ?? 0} spots left
+                      </span>
+                    )}
+                  </div>
+                  <span className="dt-level-badge">{activeDisc.level}</span>
+                  <p className="dt-desc">{activeDisc.description}</p>
+                  {!isCompletedDetail && (
+                    <div className="dt-points">
+                      <h3>What you&apos;ll discuss</h3>
+                      <ul>
+                        {(activeDisc.points || []).map((p, i) => (
+                          <li key={i} style={{ animationDelay: `${0.3 + i * 0.1}s` }}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
+              {isCompletedDetail ? (
+                <div className="dt-reviews-panel">
+                  <div className="dt-reviews-head">
+                    <span className="dt-reviews-eyebrow">Teacher&apos;s Feedback</span>
+                    <h2>How the students did</h2>
+                  </div>
+                  {reviews.length > 0 ? (
+                    <>
+                      <span className="dt-rev-count">{reviews.length} student {reviews.length === 1 ? 'review' : 'reviews'}</span>
+                      <div className="dt-rev-list">
+                        {reviews.map((r, i) => (
+                          <article key={i} className="dt-rev-card" style={{ animationDelay: `${0.12 + i * 0.07}s` }}>
+                            <span className="dt-rev-avatar">{(r.name || '?').trim().charAt(0).toUpperCase()}</span>
+                            <div className="dt-rev-body">
+                              <div className="dt-rev-head-row">
+                                <div className="dt-rev-id">
+                                  <span className="dt-rev-name">{r.name}</span>
+                                  {r.level && <span className="dt-rev-level">{r.level}</span>}
+                                </div>
+                              </div>
+                              <p className="dt-rev-text">{r.text}</p>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="dt-rev-empty">
+                      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <p>The teacher hasn&apos;t shared feedback for this session yet.</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
               <div className="dt-form-panel">
                 {enrollSuccess ? (
                   <div className="success-message">
@@ -578,9 +657,11 @@ function HomeContent() {
                   </>
                 )}
               </div>
+              )}
             </div>
           </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Footer CTA + Footer */}
