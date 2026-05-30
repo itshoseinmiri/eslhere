@@ -54,6 +54,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isStudentsPage = pathname === '/admin/students';
   const isStudentDetail = pathname.startsWith('/admin/student/');
   const isSessionsPage = pathname === '/admin/sessions' || pathname.startsWith('/admin/sessions/');
+  const isDiscussionsPage = pathname === '/admin/discussions' || pathname.startsWith('/admin/discussions/');
+  const isManageDiscPage = pathname === '/admin/manage-discussions' || pathname.startsWith('/admin/manage-discussions/');
   const isAvailabilityPage = pathname === '/admin/availability';
 
   return (
@@ -80,7 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <div className="sidebar-section-label">Main</div>
             <ul className="sidebar-nav">
-              <li><Link className={!isStudentsPage && !isStudentDetail && !isSessionsPage && !isAvailabilityPage ? 'active' : ''} href="/admin">
+              <li><Link className={!isStudentsPage && !isStudentDetail && !isSessionsPage && !isDiscussionsPage && !isManageDiscPage && !isAvailabilityPage ? 'active' : ''} href="/admin">
                 <span className="nav-icon">
                   <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </span>
@@ -98,6 +100,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </span>
                 <span className="nav-label">Sessions</span>
               </Link></li>
+              <li><Link className={isDiscussionsPage ? 'active' : ''} href="/admin/discussions">
+                <span className="nav-icon">
+                  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+                <span className="nav-label">Discussion Enrollments</span>
+              </Link></li>
               <li><Link className={isAvailabilityPage ? 'active' : ''} href="/admin/availability">
                 <span className="nav-icon">
                   <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/><polyline points="12 6 12 12 16 14" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -114,11 +122,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </span>
                 <span className="nav-label">Reports</span>
               </Link></li>
-              <li><Link href="/admin" style={{ opacity: 0.45, pointerEvents: 'none' }}>
+              <li><Link className={isManageDiscPage ? 'active' : ''} href="/admin/manage-discussions">
                 <span className="nav-icon">
-                  <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" strokeLinecap="round" strokeLinejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/><line x1="9" y1="10" x2="15" y2="10" strokeLinecap="round"/><line x1="9" y1="14" x2="13" y2="14" strokeLinecap="round"/></svg>
                 </span>
-                <span className="nav-label">Subjects</span>
+                <span className="nav-label">Manage Discussions</span>
               </Link></li>
             </ul>
 

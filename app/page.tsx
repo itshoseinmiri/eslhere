@@ -15,10 +15,12 @@ export default function Home() {
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [view, setView] = useState<'select' | 'form'>('select');
+  const [view, setView] = useState<'select' | 'form' | 'discussions' | 'detail'>('select');
   const [tab, setTab] = useState<'private' | 'group'>('private');
   const [successForm, setSuccessForm] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const [selectedDisc, setSelectedDisc] = useState<number | null>(null);
+  const [enrollSuccess, setEnrollSuccess] = useState(false);
   const logoRef = useRef<HTMLImageElement>(null);
   const logoClicksRef = useRef(0);
   const logoTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -29,10 +31,27 @@ function HomeContent() {
     if (path === '/register' || cls) {
       setView('form');
       setTab(cls === 'group' ? 'group' : 'private');
+    } else if (path === '/discussions') {
+      setView('discussions');
+    } else if (path.startsWith('/discussions/')) {
+      const id = Number(path.split('/')[2]);
+      if (id) { setSelectedDisc(id); setView('detail'); }
     }
   }, [searchParams]);
 
-  function showView(target: 'select' | 'private' | 'group') {
+  const [allDiscussions, setAllDiscussions] = useState<{ id: number; topic: string; date?: string; time?: string; dates?: { date: string; time?: string }[]; level: string; description: string; spots?: number; participants?: number; duration: string; points?: string[]; status: string; thumbnail?: string; reviews?: { name: string; level?: string; text: string }[] }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/discussions')
+      .then(res => res.ok ? res.json() : [])
+      .then(setAllDiscussions)
+      .catch(() => {});
+  }, []);
+
+  const upcomingDiscussions = allDiscussions.filter(d => d.status === 'upcoming');
+  const completedDiscussions = allDiscussions.filter(d => d.status === 'completed');
+
+  function showView(target: 'select' | 'private' | 'group' | 'discussions') {
     if (target === 'select') {
       setView('select');
       setSuccessForm(null);
@@ -41,6 +60,9 @@ function HomeContent() {
       setView('form');
       setTab('private');
       window.history.pushState(null, '', '/register?class=private');
+    } else if (target === 'discussions') {
+      setView('discussions');
+      window.history.pushState(null, '', '/discussions');
     } else {
       setView('form');
       setTab('group');
@@ -49,15 +71,29 @@ function HomeContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function openDetail(id: number) {
+    setSelectedDisc(id);
+    setEnrollSuccess(false);
+    setView('detail');
+    window.history.pushState(null, '', `/discussions/${id}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function handleLogoClick() {
     logoClicksRef.current++;
     if (logoTimerRef.current) clearTimeout(logoTimerRef.current);
-    logoTimerRef.current = setTimeout(() => { logoClicksRef.current = 0; }, 600);
     if (logoClicksRef.current >= 3) {
       logoClicksRef.current = 0;
       sessionStorage.setItem('admin_access_granted', 'true');
       router.push('/login');
+      return;
     }
+    logoTimerRef.current = setTimeout(() => {
+      if (logoClicksRef.current < 3) {
+        logoClicksRef.current = 0;
+        showView('select');
+      }
+    }, 400);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>, type: 'private' | 'group') {
@@ -102,6 +138,56 @@ function HomeContent() {
     }
   }
 
+  async function handleEnroll(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const inputs = form.querySelectorAll('input, select, textarea');
+    let valid = true;
+    inputs.forEach((input) => {
+      const el = input as HTMLInputElement;
+      if (!el.value.trim()) {
+        valid = false;
+        el.style.borderColor = '#d94f4f';
+        setTimeout(() => { el.style.borderColor = ''; }, 1500);
+      }
+    });
+    if (!valid) return;
+
+    const btn = form.querySelector('.submit-btn') as HTMLButtonElement;
+    btn.classList.add('loading');
+
+    const activeDisc = upcomingDiscussions.find(d => d.id === selectedDisc);
+    const data: Record<string, unknown> = {
+      type: 'discussion',
+      discussionId: selectedDisc,
+      discussionTopic: activeDisc?.topic,
+      registeredAt: new Date().toISOString(),
+    };
+    inputs.forEach((el) => {
+      const input = el as HTMLInputElement;
+      if (!input.name) return;
+      data[input.name] = input.value.trim();
+    });
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed');
+      setEnrollSuccess(true);
+    } catch {
+      setError(true);
+      setTimeout(() => setError(false), 3000);
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  const activeDisc = allDiscussions.find(d => d.id === selectedDisc);
+  const isCompletedDetail = activeDisc?.status === 'completed';
+
   return (
     <>
 
@@ -109,54 +195,73 @@ function HomeContent() {
         <div className="top-header-inner">
           <img ref={logoRef} src="/images/logo.webp" alt="Logo" onClick={handleLogoClick} style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
           <span className="header-tagline">English as a Second Language</span>
+          <nav className="header-nav">
+            <button className={`header-nav-link ${view === 'discussions' || view === 'detail' ? 'active' : ''}`} onClick={() => showView('discussions')}>
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <span>Discussions</span>
+            </button>
+          </nav>
         </div>
       </header>
 
       {/* Selection View */}
-      <div className={`view ${view === 'select' ? 'active' : ''}`}>
+      <div className={`!px-4 view ${view === 'select' ? 'active' : ''}`}>
         <div className="hero-banner">
           <img src="/images/banner.webp" alt="Language. Learning. Impact." />
         </div>
-        <div className="selection-wrap">
+        <div className="selection-wrap w-full">
           <div className="selection-header">
             <span className="section-label">Choose your class</span>
             <h1>Find the right class for you</h1>
+            <div className="header-divider">
+              <span className="divider-line"></span>
+              <span className="divider-dot"></span>
+              <span className="divider-line"></span>
+            </div>
           </div>
           <div className="selection-boxes">
             <div className="selection-box">
-              <div className="box-body">
-                <h3>Private Speaking Classes</h3>
-                <p className="box-subtitle">One-on-one English lessons personalized just for you.</p>
-                <ul className="box-features">
-                  <li>Personalized lesson plan</li>
-                  <li>Flexible scheduling</li>
-                  <li>Faster progress</li>
-                </ul>
+              <div className="box-top-row">
+                <div className="box-intro">
+                  <h3>Private Speaking Classes</h3>
+                  <p className="box-subtitle">One-on-one English lessons personalized just for you.</p>
+                  <ul className="box-features">
+                    <li>Personalized lesson plan</li>
+                    <li>Flexible scheduling</li>
+                    <li>Faster progress</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="box-bottom-row">
                 <button className="box-cta" onClick={() => showView('private')}>
                   Book Private Class
                   <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
-              </div>
-              <div className="box-img">
-                <img src="/images/private-class.webp" alt="Private Speaking Classes" />
+                <div className="box-illustration-bottom">
+                  <img src="/images/private-bottom.png" alt="" />
+                </div>
               </div>
             </div>
             <div className="selection-box">
-              <div className="box-body">
-                <h3>Group Speaking Classes</h3>
-                <p className="box-subtitle">Practice with other learners in a supportive group.</p>
-                <ul className="box-features">
-                  <li>Interactive group discussions</li>
-                  <li>Learn from peers</li>
-                  <li>Affordable &amp; fun</li>
-                </ul>
+              <div className="box-top-row">
+                <div className="box-intro">
+                  <h3>Group Speaking Classes</h3>
+                  <p className="box-subtitle">Practice with other learners in a supportive group.</p>
+                  <ul className="box-features">
+                    <li>Interactive group discussions</li>
+                    <li>Learn from peers</li>
+                    <li>Affordable &amp; fun</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="box-bottom-row">
                 <button className="box-cta" onClick={() => showView('group')}>
                   Book Group Class
                   <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
-              </div>
-              <div className="box-img">
-                <img src="/images/group-class.webp" alt="Group Speaking Classes" />
+                <div className="box-illustration-bottom">
+                  <img src="/images/group-bottom.png" alt="" />
+                </div>
               </div>
             </div>
           </div>
@@ -261,8 +366,306 @@ function HomeContent() {
         </div>
       </div>
 
-      {/* Footer CTA + Footer (only on select view) */}
-      {view === 'select' && (
+      {/* Discussions View */}
+      <div className={`view ${view === 'discussions' ? 'active' : ''}`}>
+        <div className="disc-wrap">
+          <button className="back-btn" onClick={() => showView('select')}>
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Back
+          </button>
+          <div className="disc-header">
+            <span className="section-label">Group Sessions</span>
+            <h1>Discussion Topics</h1>
+            <p className="disc-subtitle">Explore past conversations and join upcoming sessions</p>
+            <div className="header-divider">
+              <span className="divider-line"></span>
+              <span className="divider-dot"></span>
+              <span className="divider-line"></span>
+            </div>
+          </div>
+
+          <div className="disc-section">
+            <div className="disc-section-head">
+              <span className="disc-pulse"></span>
+              <h2>Upcoming</h2>
+              <span className="disc-section-count">{upcomingDiscussions.length} sessions</span>
+            </div>
+            {upcomingDiscussions.length === 0 ? (
+              <div className="disc-empty">No upcoming discussions scheduled yet</div>
+            ) : (
+              <div className="disc-grid">
+                {upcomingDiscussions.map((d, i) => {
+                  const discDates = d.dates && d.dates.length > 0 ? d.dates : (d.date ? [{ date: d.date, time: d.time }] : []);
+                  return (
+                  <div key={d.id} className="disc-card disc-upcoming" style={{ animationDelay: `${0.1 + i * 0.1}s`, cursor: 'pointer' }} onClick={() => openDetail(d.id)}>
+                    {d.thumbnail && <img src={d.thumbnail} alt="" className="disc-card-thumb" />}
+                    <div className="disc-card-inner">
+                      <span className="disc-watermark">{String(i + 1).padStart(2, '0')}</span>
+                      <div className="disc-card-top">
+                        <span className="disc-level">{d.level}</span>
+                        <span className="disc-date">
+                          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                          {discDates[0]?.date}{discDates[0]?.time ? ` \u00b7 ${discDates[0].time}` : ''}
+                          {discDates.length > 1 && <span className="disc-date-more">+{discDates.length - 1}</span>}
+                        </span>
+                      </div>
+                      <h3 className="disc-topic">{d.topic}</h3>
+                      <p className="disc-desc">{d.description}</p>
+                      <div className="disc-card-bottom">
+                        <div className="disc-meta">
+                          <span className="disc-meta-item">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {d.duration}
+                          </span>
+                          <span className="disc-meta-item disc-spots">
+                            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            {d.spots ?? 0} spots left
+                          </span>
+                        </div>
+                        <span className="disc-join-btn">
+                          Join
+                          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="disc-divider">
+            <span className="disc-divider-line"></span>
+            <span className="disc-divider-dot"></span>
+            <span className="disc-divider-line"></span>
+          </div>
+
+          <div className="disc-section">
+            <div className="disc-section-head">
+              <span className="disc-check">
+                <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </span>
+              <h2>Completed</h2>
+              <span className="disc-section-count">{completedDiscussions.length} sessions</span>
+            </div>
+            {completedDiscussions.length === 0 ? (
+              <div className="disc-empty">No completed discussions yet</div>
+            ) : (
+              <div className="disc-grid">
+                {completedDiscussions.map((d, i) => {
+                  const discDates = d.dates && d.dates.length > 0 ? d.dates : (d.date ? [{ date: d.date, time: d.time }] : []);
+                  return (
+                  <div key={d.id} className="disc-card disc-completed" style={{ animationDelay: `${0.15 + i * 0.08}s`, cursor: 'pointer' }} onClick={() => openDetail(d.id)}>
+                    {d.thumbnail && <img src={d.thumbnail} alt="" className="disc-card-thumb" />}
+                    <div className="disc-card-inner">
+                      <span className="disc-watermark">{String(i + 1).padStart(2, '0')}</span>
+                      <div className="disc-card-top">
+                        <span className="disc-level">{d.level}</span>
+                        <span className="disc-date">
+                          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                          {discDates[0]?.date || '\u2014'}
+                          {discDates.length > 1 && <span className="disc-date-more">+{discDates.length - 1}</span>}
+                        </span>
+                      </div>
+                      <h3 className="disc-topic">{d.topic}</h3>
+                      <p className="disc-desc">{d.description}</p>
+                      <div className="disc-card-bottom">
+                        <div className="disc-meta">
+                          <span className="disc-meta-item">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {d.duration}
+                          </span>
+                          <span className="disc-meta-item">
+                            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            {d.participants ?? 0} joined
+                          </span>
+                          {d.reviews && d.reviews.length > 0 && (
+                            <span className="disc-meta-item disc-reviews-count">
+                              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              {d.reviews.length} {d.reviews.length === 1 ? 'review' : 'reviews'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="disc-view-btn">
+                          View
+                          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Discussion Detail View */}
+      <div className={`view ${view === 'detail' ? 'active' : ''}`}>
+        {activeDisc && (() => {
+          const detailDates = activeDisc.dates && activeDisc.dates.length > 0
+            ? activeDisc.dates
+            : (activeDisc.date ? [{ date: activeDisc.date, time: activeDisc.time }] : []);
+          const reviews = activeDisc.reviews || [];
+          return (
+          <div className="dt-wrap">
+            <button className="back-btn" onClick={() => { setView('discussions'); setEnrollSuccess(false); window.history.pushState(null, '', '/discussions'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+              <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Discussions
+            </button>
+            <div className={`dt-layout${isCompletedDetail ? ' dt-layout-completed' : ''}`}>
+              <div className={`dt-info${isCompletedDetail ? ' dt-info-completed' : ''}`}>
+                {activeDisc.thumbnail && <div className="dt-thumb-wrap"><img src={activeDisc.thumbnail} alt="" className="dt-thumb" /></div>}
+                <div className="dt-info-content">
+                  {isCompletedDetail ? (
+                    <div className="dt-info-label dt-info-label-done">
+                      <span className="dt-done-check">
+                        <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </span>
+                      <span>Completed Session</span>
+                    </div>
+                  ) : (
+                    <div className="dt-info-label">
+                      <span className="disc-pulse"></span>
+                      <span>Upcoming Session</span>
+                    </div>
+                  )}
+                  <h1 className="dt-title">{activeDisc.topic}</h1>
+                  <div className="dt-short-divider"></div>
+                  <div className="dt-meta-row">
+                    {detailDates.map((dd, i) => (
+                      <span key={i} className="dt-meta-tag">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        {dd.date}{dd.time ? ` \u00b7 ${dd.time}` : ''}
+                      </span>
+                    ))}
+                    <span className="dt-meta-tag">
+                      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      {activeDisc.duration}
+                    </span>
+                    {isCompletedDetail ? (
+                      <span className="dt-meta-tag dt-joined-tag">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        {activeDisc.participants ?? 0} joined
+                      </span>
+                    ) : (
+                      <span className="dt-meta-tag dt-spots-tag">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        {activeDisc.spots ?? 0} spots left
+                      </span>
+                    )}
+                  </div>
+                  <span className="dt-level-badge">{activeDisc.level}</span>
+                  <p className="dt-desc">{activeDisc.description}</p>
+                  {!isCompletedDetail && (
+                    <div className="dt-points">
+                      <h3>What you&apos;ll discuss</h3>
+                      <ul>
+                        {(activeDisc.points || []).map((p, i) => (
+                          <li key={i} style={{ animationDelay: `${0.3 + i * 0.1}s` }}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {isCompletedDetail ? (
+                <div className="dt-reviews-panel">
+                  <div className="dt-reviews-head">
+                    <span className="dt-reviews-eyebrow">Teacher&apos;s Feedback</span>
+                    <h2>How the students did</h2>
+                  </div>
+                  {reviews.length > 0 ? (
+                    <>
+                      <span className="dt-rev-count">{reviews.length} student {reviews.length === 1 ? 'review' : 'reviews'}</span>
+                      <div className="dt-rev-list">
+                        {reviews.map((r, i) => (
+                          <article key={i} className="dt-rev-card" style={{ animationDelay: `${0.12 + i * 0.07}s` }}>
+                            <span className="dt-rev-avatar">{(r.name || '?').trim().charAt(0).toUpperCase()}</span>
+                            <div className="dt-rev-body">
+                              <div className="dt-rev-head-row">
+                                <div className="dt-rev-id">
+                                  <span className="dt-rev-name">{r.name}</span>
+                                  {r.level && <span className="dt-rev-level">{r.level}</span>}
+                                </div>
+                              </div>
+                              <p className="dt-rev-text">{r.text}</p>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="dt-rev-empty">
+                      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <p>The teacher hasn&apos;t shared feedback for this session yet.</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+              <div className="dt-form-panel">
+                {enrollSuccess ? (
+                  <div className="success-message">
+                    <div className="success-icon" style={{ background: '#fef0e9' }}>
+                      <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <h2>You&apos;re Enrolled</h2>
+                    <p>We&apos;ll send you the session details soon.</p>
+                    <button className="another-btn" onClick={() => { setEnrollSuccess(false); showView('discussions'); }}>Back to Discussions</button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="dt-form-head">
+                      <h2>Enroll in Discussion</h2>
+                      <p>You can fill the form in <span className="farsi-green">Farsi</span></p>
+                    </div>
+                    <form onSubmit={handleEnroll} noValidate>
+                      <div className="form-row">
+                        <div className="field"><label>First Name</label><input type="text" name="firstName" placeholder="Jane" required /></div>
+                        <div className="field"><label>Last Name</label><input type="text" name="lastName" placeholder="Doe" required /></div>
+                      </div>
+                      <div className="form-row">
+                        <div className="field"><label>Age</label><input type="number" name="age" placeholder="25" min={5} max={120} required /></div>
+                        <div className="field">
+                          <label>English Level</label>
+                          <select name="englishLevel" required defaultValue="">
+                            <option value="" disabled>Select your level</option>
+                            <option value="A1">A1 - Beginner</option>
+                            <option value="A2">A2 - Elementary</option>
+                            <option value="B1">B1 - Intermediate</option>
+                            <option value="B2">B2 - Upper Intermediate</option>
+                            <option value="C1">C1 - Advanced</option>
+                            <option value="C2">C2 - Proficient</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="field"><label>Email</label><input type="email" name="email" placeholder="jane@example.com" required /></div>
+                      <div className="field"><label>Phone Number</label><input type="tel" name="phone" placeholder="+98 912 345 6789" required /></div>
+                      <div className="field">
+                        <label>Have you joined a group discussion before?</label>
+                        <select name="priorExperience" required defaultValue="">
+                          <option value="" disabled>Select an option</option>
+                          <option value="yes">Yes</option>
+                          <option value="no">No, this is my first time</option>
+                        </select>
+                      </div>
+                      <div className="field"><label>What do you hope to gain from this discussion?</label><textarea name="goals" placeholder="e.g. practice speaking, build confidence, learn new vocabulary..." required /></div>
+                      <button type="submit" className="submit-btn dt-submit-btn">Enroll Now</button>
+                    </form>
+                  </>
+                )}
+              </div>
+              )}
+            </div>
+          </div>
+          );
+        })()}
+      </div>
+
+      {/* Footer CTA + Footer */}
+      {(view === 'select' || view === 'discussions') && (
         <>
           <div className="footer-cta">
             <div className="footer-cta-card">
@@ -298,6 +701,7 @@ function HomeContent() {
                 <ul>
                   <li><a onClick={() => showView('private')}>Private Classes</a></li>
                   <li><a onClick={() => showView('group')}>Group Classes</a></li>
+                  <li><a onClick={() => showView('discussions')}>Discussions</a></li>
                 </ul>
               </div>
             </div>
