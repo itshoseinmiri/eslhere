@@ -1,27 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
+
+// Hydration-safe "mounted" flag. The form uses `<style jsx global>` (styled-jsx),
+// which this app never server-renders — there's no StyleRegistry in the root
+// layout, so SSR omits the styles while the client injects them, causing a
+// hydration mismatch that makes the dev server reload in an infinite loop.
+// Every other styled-jsx page avoids SSR the same way (the admin layout only
+// renders children after mount). Render nothing until mounted on the client.
+const subscribeNoop = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [accessGranted] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const granted = sessionStorage.getItem('admin_access_granted');
-    if (granted) {
-      sessionStorage.removeItem('admin_access_granted');
-      return true;
-    }
-    return false;
-  });
+  const mounted = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const [toast, setToast] = useState('');
 
   useEffect(() => {
-    if (!accessGranted) return;
-
     // Check if already logged in
     const token = localStorage.getItem('admin_access_token');
     if (token) {
@@ -32,23 +32,7 @@ export default function LoginPage() {
         })
         .catch(() => localStorage.removeItem('admin_access_token'));
     }
-  }, [router, accessGranted]);
-
-  if (!accessGranted) {
-    return (
-      <>
-        <style jsx global>{`
-          body { font-family: 'Poppins', sans-serif; background: #fff; color: #1a2e44; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        `}</style>
-        <div style={{ maxWidth: 400 }}>
-          <h1 style={{ fontSize: '5rem', fontWeight: 600, color: '#d8e3ec', lineHeight: 1, marginBottom: 12 }}>404</h1>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: 500, marginBottom: 8 }}>Page Not Found</h2>
-          <p style={{ fontSize: '0.88rem', color: '#5f7a8f', marginBottom: 24 }}>The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
-          <a href="/" style={{ display: 'inline-block', padding: '10px 24px', background: '#2db5c0', color: '#fff', textDecoration: 'none', borderRadius: 7, fontSize: '0.85rem', fontWeight: 500 }}>Go Home</a>
-        </div>
-      </>
-    );
-  }
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,6 +62,8 @@ export default function LoginPage() {
       setTimeout(() => setToast(''), 3000);
     }
   }
+
+  if (!mounted) return null;
 
   return (
     <>

@@ -1,34 +1,31 @@
 import { verifyToken } from '@/lib/auth';
-import { readJsonFile, writeJsonFile } from '@/lib/data';
+import { db } from '@/lib/db';
+import { serializeDiscussion, jsonToDiscussionStatus } from '@/lib/serialize';
 
-interface Discussion {
-  id: number;
-  topic: string;
-  date?: string;
+interface DateEntry {
+  date: string;
   time?: string;
-  dates?: { date: string; time?: string }[];
-  level: string;
-  description: string;
-  spots?: number;
-  participants?: number;
-  duration: string;
-  points?: string[];
-  status: string;
-  thumbnail?: string;
-  reviews?: { name: string; level?: string; text: string }[];
+}
+interface ReviewEntry {
+  name: string;
+  level?: string;
+  text: string;
 }
 
 export async function GET() {
   try {
-    const discussions = readJsonFile<Discussion[]>('discussions.json', []);
-    return Response.json(discussions);
+    const discussions = await db.discussion.findMany({
+      include: { dates: { orderBy: { id: 'asc' } }, reviews: { orderBy: { id: 'asc' } } },
+      orderBy: { id: 'asc' },
+    });
+    return Response.json(discussions.map(serializeDiscussion));
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
-  if (!verifyToken(request)) {
+  if (!(await verifyToken(request))) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -40,31 +37,35 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const discussions = readJsonFile<Discussion[]>('discussions.json', []);
+    const dateEntries: DateEntry[] =
+      Array.isArray(dates) && dates.length > 0 ? dates : date ? [{ date, time }] : [];
 
-    const nextId = Math.max(0, ...discussions.map(d => d.id)) + 1;
+    const created = await db.discussion.create({
+      data: {
+        topic: String(topic).trim(),
+        level,
+        description: String(description).trim(),
+        duration,
+        status: status ? jsonToDiscussionStatus(status) : 'UPCOMING',
+        spots: spots != null ? Number(spots) : null,
+        participants: participants != null ? Number(participants) : null,
+        thumbnail: thumbnail || null,
+        points: Array.isArray(points) ? points : [],
+        dates: {
+          create: dateEntries.map((d: DateEntry) => ({ date: d.date, time: d.time ?? '' })),
+        },
+        reviews: {
+          create: (Array.isArray(reviews) ? reviews : []).map((r: ReviewEntry) => ({
+            name: r.name,
+            level: r.level ?? '',
+            text: r.text,
+          })),
+        },
+      },
+      include: { dates: { orderBy: { id: 'asc' } }, reviews: { orderBy: { id: 'asc' } } },
+    });
 
-    const newDiscussion: Discussion = {
-      id: nextId,
-      topic: topic.trim(),
-      ...(dates && dates.length > 0 ? { dates } : {}),
-      ...(date && !dates ? { date } : {}),
-      ...(time ? { time } : {}),
-      level,
-      description: description.trim(),
-      ...(spots ? { spots: Number(spots) } : {}),
-      ...(participants ? { participants: Number(participants) } : {}),
-      duration,
-      ...(points && points.length > 0 ? { points } : {}),
-      status: status || 'upcoming',
-      ...(thumbnail ? { thumbnail } : {}),
-      ...(reviews && reviews.length > 0 ? { reviews } : {}),
-    };
-
-    discussions.push(newDiscussion);
-    writeJsonFile('discussions.json', discussions);
-
-    return Response.json(newDiscussion, { status: 201 });
+    return Response.json(serializeDiscussion(created), { status: 201 });
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }

@@ -1,37 +1,42 @@
-import { randomBytes } from 'crypto';
 import { verifyToken } from '@/lib/auth';
-import { readJsonFile, writeJsonFile } from '@/lib/data';
+import { db } from '@/lib/db';
+import { serializeStudent } from '@/lib/serialize';
 
 export async function GET(request: Request) {
-  if (!verifyToken(request)) {
+  if (!(await verifyToken(request))) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {
-    const students = readJsonFile<Record<string, unknown>[]>('students.json', []);
-    return Response.json(students.filter(s => s.id && s.firstName));
+    const students = await db.student.findMany({ orderBy: { addedAt: 'asc' } });
+    return Response.json(students.map(serializeStudent));
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
-  if (!verifyToken(request)) {
+  if (!(await verifyToken(request))) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {
-    const student = await request.json();
+    const body = await request.json();
     const required = ['firstName', 'lastName', 'email', 'phone', 'englishLevel', 'type'];
     for (const field of required) {
-      if (!student[field]) {
+      if (!body[field]) {
         return Response.json({ error: `Missing field: ${field}` }, { status: 400 });
       }
     }
-    student.id = randomBytes(8).toString('hex');
-    student.addedAt = new Date().toISOString();
-    const students = readJsonFile<Record<string, unknown>[]>('students.json', []).filter(s => s.id && s.firstName);
-    students.push(student);
-    writeJsonFile('students.json', students);
-    return Response.json({ success: true, student });
+    const created = await db.student.create({
+      data: {
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+        phone: body.phone,
+        englishLevel: body.englishLevel,
+        type: body.type,
+      },
+    });
+    return Response.json({ success: true, student: serializeStudent(created) });
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }

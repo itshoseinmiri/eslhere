@@ -1,45 +1,42 @@
 import { createHash, randomBytes, timingSafeEqual } from 'crypto';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { db } from '@/lib/db';
 
-const DATA_DIR = join(process.cwd(), 'data');
-const ADMIN_FILE = join(DATA_DIR, 'admin.json');
+const ADMIN_ID = 'admin';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const ADMIN_HASH = createHash('sha256').update(ADMIN_PASSWORD).digest('hex');
-
-function ensureDataDir() {
-  if (!existsSync(DATA_DIR)) {
-    mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
 
 export function verifyPassword(pw: string): boolean {
   const hash = createHash('sha256').update(pw).digest('hex');
   return timingSafeEqual(Buffer.from(hash), Buffer.from(ADMIN_HASH));
 }
 
-export function getAdminData(): { access_token: string | null; expired_at: string | null } {
-  try {
-    return JSON.parse(readFileSync(ADMIN_FILE, 'utf-8'));
-  } catch {
-    return { access_token: null, expired_at: null };
-  }
+export async function getAdminData(): Promise<{ access_token: string | null; expired_at: string | null }> {
+  const admin = await db.adminSession.findUnique({ where: { id: ADMIN_ID } });
+  return {
+    access_token: admin?.accessToken ?? null,
+    expired_at: admin?.expiredAt ? admin.expiredAt.toISOString() : null,
+  };
 }
 
-export function saveAdminData(data: { access_token: string | null; expired_at: string | null }) {
-  ensureDataDir();
-  writeFileSync(ADMIN_FILE, JSON.stringify(data, null, 2), 'utf-8');
+export async function saveAdminData(data: { access_token: string | null; expired_at: string | null }) {
+  const accessToken = data.access_token;
+  const expiredAt = data.expired_at ? new Date(data.expired_at) : null;
+  await db.adminSession.upsert({
+    where: { id: ADMIN_ID },
+    create: { id: ADMIN_ID, accessToken, expiredAt },
+    update: { accessToken, expiredAt },
+  });
 }
 
-export function verifyToken(request: Request): boolean {
+export async function verifyToken(request: Request): Promise<boolean> {
   const auth = request.headers.get('authorization');
   if (!auth || !auth.startsWith('Bearer ')) return false;
   const token = auth.slice(7);
-  const admin = getAdminData();
+  const admin = await getAdminData();
   if (!admin.access_token || admin.access_token !== token) return false;
   if (!admin.expired_at || new Date(admin.expired_at).getTime() < Date.now()) {
-    saveAdminData({ access_token: null, expired_at: null });
+    await saveAdminData({ access_token: null, expired_at: null });
     return false;
   }
   return true;

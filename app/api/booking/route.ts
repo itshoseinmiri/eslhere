@@ -1,48 +1,24 @@
-import { readJsonFile, writeJsonFile } from '@/lib/data';
-
-interface ClassRecord {
-  id: string;
-  date: string;
-  duration: number;
-  status: string;
-}
-
-interface AvailabilitySlot {
-  date: string;
-  start: string;
-  end: string;
-}
-
-interface BookingRequest {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  topic: string;
-  notes?: string;
-  date: string;
-  duration: number;
-  status: 'pending' | 'confirmed' | 'canceled';
-  createdAt: string;
-}
+import { db } from '@/lib/db';
+import { serializeBooking } from '@/lib/serialize';
 
 // GET — return all booked time windows (for the calendar to mark unavailable slots)
 export async function GET() {
   try {
-    const classes = readJsonFile<ClassRecord[]>('classes.json', []);
-    const bookings = readJsonFile<BookingRequest[]>('bookings.json', []);
-    const availability = readJsonFile<AvailabilitySlot[]>('availability.json', []);
+    const [classes, bookings, availability] = await Promise.all([
+      db.class.findMany({ where: { status: { not: 'CANCELED' } } }),
+      db.booking.findMany({ where: { status: { not: 'CANCELED' } } }),
+      db.availability.findMany({ orderBy: [{ date: 'asc' }, { start: 'asc' }] }),
+    ]);
 
     const blocked = [
-      ...classes
-        .filter(c => c.status !== 'canceled')
-        .map(c => ({ start: c.date, duration: c.duration })),
-      ...bookings
-        .filter(b => b.status !== 'canceled')
-        .map(b => ({ start: b.date, duration: b.duration })),
+      ...classes.map((c) => ({ start: c.date.toISOString(), duration: c.duration })),
+      ...bookings.map((b) => ({ start: b.date.toISOString(), duration: b.duration })),
     ];
 
-    return Response.json({ blocked, availability });
+    return Response.json({
+      blocked,
+      availability: availability.map((a) => ({ date: a.date, start: a.start, end: a.end })),
+    });
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }
@@ -63,20 +39,27 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
-    const classes = readJsonFile<ClassRecord[]>('classes.json', []);
-    const bookings = readJsonFile<BookingRequest[]>('bookings.json', []);
-
-    // Overlap check against existing sessions and pending bookings
     const newStart = new Date(date).getTime();
     const newEnd = newStart + Number(duration) * 60_000;
 
+    // Don't allow booking in the past
+    if (newStart < Date.now()) {
+      return Response.json({ error: 'Cannot book a session in the past.' }, { status: 400 });
+    }
+
+    // Overlap check against existing sessions and pending bookings
+    const [classes, bookings] = await Promise.all([
+      db.class.findMany({ where: { status: { not: 'CANCELED' } } }),
+      db.booking.findMany({ where: { status: { not: 'CANCELED' } } }),
+    ]);
+
     const allBlocked = [
-      ...classes.filter(c => c.status !== 'canceled'),
-      ...bookings.filter(b => b.status !== 'canceled'),
+      ...classes.map((c) => ({ date: c.date, duration: c.duration })),
+      ...bookings.map((b) => ({ date: b.date, duration: b.duration })),
     ];
 
-    const overlap = allBlocked.find(c => {
-      const s = new Date(c.date).getTime();
+    const overlap = allBlocked.find((c) => {
+      const s = c.date.getTime();
       const e = s + c.duration * 60_000;
       return newStart < e && newEnd > s;
     });
@@ -88,35 +71,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Don't allow booking in the past
-    if (newStart < Date.now()) {
-      return Response.json({ error: 'Cannot book a session in the past.' }, { status: 400 });
-    }
-
-    const existingIds = bookings.map(b => {
-      const m = b.id.match(/^bkg(\d+)$/);
-      return m ? parseInt(m[1], 10) : 0;
+    const created = await db.booking.create({
+      data: {
+        name: String(name).trim(),
+        email: String(email).trim().toLowerCase(),
+        ...(phone ? { phone: String(phone).trim() } : {}),
+        topic: String(topic).trim(),
+        ...(notes ? { notes: String(notes).trim() } : {}),
+        date: new Date(date),
+        duration: Number(duration),
+        status: 'PENDING',
+      },
     });
-    const nextNum = Math.max(0, ...existingIds) + 1;
-    const newId = `bkg${String(nextNum).padStart(3, '0')}`;
 
-    const newBooking: BookingRequest = {
-      id: newId,
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      ...(phone ? { phone: phone.trim() } : {}),
-      topic: topic.trim(),
-      ...(notes ? { notes: notes.trim() } : {}),
-      date,
-      duration: Number(duration),
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-
-    bookings.push(newBooking);
-    writeJsonFile('bookings.json', bookings);
-
-    return Response.json(newBooking, { status: 201 });
+    return Response.json(serializeBooking(created), { status: 201 });
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }

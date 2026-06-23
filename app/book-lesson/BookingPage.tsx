@@ -249,10 +249,6 @@ export default function BookingPage() {
         {/* ═══ PACKAGE SELECTION ═══ */}
         {step === 'package' && (
           <div className="bk-pkg-view">
-            {/* Decorative background shapes */}
-            <div className="bk-pkg-bg-orb bk-pkg-bg-orb--1" />
-            <div className="bk-pkg-bg-orb bk-pkg-bg-orb--2" />
-
             {/* Header — same as homepage */}
             <header className="bk-header">
               <div className="bk-header-inner">
@@ -268,13 +264,12 @@ export default function BookingPage() {
             <div className="bk-pkg-content">
               {/* Teacher hero */}
               <div className="bk-pkg-hero">
-                <div className="bk-pkg-hero-photo">
+                <div className="bk-pkg-hero-avatar">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1781136000&v=beta&t=ywWNGDr4RcJF_XppKSQuQmASzybBgkBjgrN8SyfeOkY" alt="Mahdieh Fahimpour" />
-                  <div className="bk-pkg-hero-status">
-                    <span className="bk-pkg-hero-dot" />
-                    Available
-                  </div>
+                  <img className="bk-pkg-hero-photo" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1782950400&v=beta&t=i_7sNLcYJNyZ0ZcSHb7WhHEEwLBDmjB9cCn1-9e77zc" alt="Mahdieh Fahimpour" />
+                  <span className="bk-pkg-hero-badge" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                  </span>
                 </div>
                 <div className="bk-pkg-hero-text">
                   <span className="bk-pkg-hero-label">Your Tutor</span>
@@ -295,6 +290,13 @@ export default function BookingPage() {
                     </span>
                   </div>
                 </div>
+                <div className="bk-pkg-hero-deco" aria-hidden="true">
+                  <svg viewBox="0 0 220 160" fill="none" preserveAspectRatio="none">
+                    <path d="M20 140 C70 90 150 110 210 40" />
+                    <path d="M20 120 C70 70 150 90 210 20" />
+                    <path d="M20 160 C70 110 150 130 210 60" />
+                  </svg>
+                </div>
               </div>
 
               {/* Section heading */}
@@ -310,15 +312,23 @@ export default function BookingPage() {
                     key={pkg.size}
                     className={`bk-pkg-card${pkg.badge === 'Most Popular' ? ' popular' : ''}${pkg.badge === 'Best Value' ? ' value' : ''}`}
                     onClick={() => selectPackage(pkg.size)}
-                    style={{ animationDelay: `${i * 100 + 200}ms` }}
+                    style={{ animationDelay: `${i * 100 + 150}ms` }}
                   >
-                    {pkg.badge && <span className="bk-pkg-badge">{pkg.badge}</span>}
-                    <div className="bk-pkg-card-top">
+                    {pkg.badge === 'Most Popular' && <span className="bk-pkg-badge">Most Popular</span>}
+                    <div className="bk-pkg-card-head">
+                      <span className={`bk-pkg-icon bk-pkg-icon--${['green', 'blue', 'teal'][i]}`}>
+                        {i === 0 && <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>}
+                        {i === 1 && <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>}
+                        {i === 2 && <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" /></svg>}
+                      </span>
+                      {pkg.badge === 'Best Value' && <span className="bk-pkg-value-tag">Best Value</span>}
+                    </div>
+                    <div className="bk-pkg-count">
                       <span className="bk-pkg-num">{pkg.size}</span>
                       <span className="bk-pkg-sessions">{pkg.size === 1 ? 'session' : 'sessions'}</span>
                     </div>
                     <div className="bk-pkg-pricing">
-                      <span className="bk-pkg-price">{fmtPrice(pkg.price)} T</span>
+                      <span className="bk-pkg-price">{fmtPrice(pkg.price)} <em>T</em></span>
                       {pkg.size > 1 && <span className="bk-pkg-per">{fmtPrice(pkg.perSession)} T/session</span>}
                     </div>
                     <span className="bk-pkg-title-label">{pkg.title}</span>
@@ -330,6 +340,37 @@ export default function BookingPage() {
                   </button>
                 ))}
               </div>
+
+              {/* Trust strip */}
+              <div className="bk-pkg-trust">
+                <div className="bk-pkg-trust-item">
+                  <span className="bk-pkg-trust-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 19l-4.8 2.5.9-5.4L4.2 12.3l5.4-.8L12 2z" /></svg>
+                  </span>
+                  <div className="bk-pkg-trust-text">
+                    <span className="bk-pkg-trust-title">High quality lessons</span>
+                    <span className="bk-pkg-trust-sub">Structured plan built around you</span>
+                  </div>
+                </div>
+                <div className="bk-pkg-trust-item">
+                  <span className="bk-pkg-trust-icon">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                  </span>
+                  <div className="bk-pkg-trust-text">
+                    <span className="bk-pkg-trust-title">Flexible scheduling</span>
+                    <span className="bk-pkg-trust-sub">Pick the times that suit you</span>
+                  </div>
+                </div>
+                <div className="bk-pkg-trust-item">
+                  <span className="bk-pkg-trust-icon">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
+                  </span>
+                  <div className="bk-pkg-trust-text">
+                    <span className="bk-pkg-trust-title">Track your progress</span>
+                    <span className="bk-pkg-trust-sub">See your fluency grow each week</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -337,228 +378,253 @@ export default function BookingPage() {
         {/* ═══ DATE & TIME SELECTION ═══ */}
         {step === 'select' && (
           <div className="bk-select-view">
-            {/* Left info column */}
-            <div className="bk-side">
-              <Link href="/" className="bk-logo">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/logo.webp" alt="ESL Here" />
-              </Link>
+            <div className="bk-select-grid">
+              {/* Left info column */}
+              <aside className="bk-side">
+                <Link href="/" className="bk-logo">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/images/logo.webp" alt="ESL Here" />
+                </Link>
 
-              <div className="bk-side-title">English Tutoring</div>
+                <div className="bk-side-title">English Tutoring</div>
 
-              <div className="bk-side-pkg" onClick={() => { setStep('package'); setSelectedSessions([]); }}>
-                <span className="bk-side-pkg-num">{packageSize}</span>
-                <div className="bk-side-pkg-info">
-                  <span className="bk-side-pkg-label">{packageSize === 1 ? 'Session' : 'Sessions'} Package</span>
-                  <span className="bk-side-pkg-change">Change</span>
-                </div>
-              </div>
-
-              <div className="bk-side-host">
-                <img className="bk-host-avatar" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1781136000&v=beta&t=ywWNGDr4RcJF_XppKSQuQmASzybBgkBjgrN8SyfeOkY" alt="Mahdieh Fahimpour" />
-                <span className="bk-host-name">Mahdieh Fahimpour</span>
-              </div>
-
-              <div className="bk-side-meta">
-                <div className="bk-meta-row">
-                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                  <span>{form.duration} min per session</span>
-                </div>
-                <div className="bk-meta-row">
-                  <svg viewBox="0 0 24 24"><path d="M15 10l-4 4l6 6l4-16l-18 7l4 2l2 6l3-4" /></svg>
-                  <span>Online via video call</span>
-                </div>
-              </div>
-
-              <div className="bk-side-desc">
-                Personalized lesson plan, speaking practice, and progress review.
-              </div>
-            </div>
-
-            {/* Main area */}
-            <div className="bk-main">
-              {loadingBlocked ? (
-                <div className="bk-loading">
-                  <div className="bk-loading-spin" />
-                  <span>Loading availability...</span>
-                </div>
-              ) : (
-                <>
-                  <div className="bk-main-header">
-                    <h2 className="bk-main-title">
-                      {packageSize === 1 ? 'Pick your date & time' : `Pick ${packageSize} dates & times`}
-                    </h2>
-                    <span className="bk-main-progress">
-                      {selectedSessions.length} / {packageSize}
-                    </span>
+                <button className="bk-side-pkg" onClick={() => { setStep('package'); setSelectedSessions([]); }}>
+                  <span className="bk-side-pkg-num">{packageSize}</span>
+                  <div className="bk-side-pkg-info">
+                    <span className="bk-side-pkg-label">Sessions Package</span>
+                    <span className="bk-side-pkg-change">Change</span>
                   </div>
+                  <svg className="bk-side-pkg-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+                </button>
 
-                  <div className="bk-content-row">
-                    {/* Left: Calendar + Time slots */}
-                    <div className="bk-cal-side">
-                      <div className="bk-cal-card">
-                        <div className="bk-cal-nav">
-                          <span className="bk-cal-month">{MONTH_NAMES[viewMonth]} {viewYear}</span>
-                          <div className="bk-cal-btns">
-                            {!isCurrentMonthView && (
-                              <button className="bk-cal-today" onClick={goToToday}>Today</button>
-                            )}
-                            <button className="bk-cal-arrow" onClick={prevMonth} disabled={isCurrentMonthView} aria-label="Previous month">
-                              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
-                            </button>
-                            <button className="bk-cal-arrow" onClick={nextMonth} aria-label="Next month">
-                              <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
-                            </button>
-                          </div>
-                        </div>
+                <div className="bk-side-host">
+                  <img className="bk-host-avatar" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1782950400&v=beta&t=i_7sNLcYJNyZ0ZcSHb7WhHEEwLBDmjB9cCn1-9e77zc" alt="Mahdieh Fahimpour" />
+                  <span className="bk-host-name">Mahdieh Fahimpour</span>
+                </div>
 
-                        <div className="bk-cal-weekdays">
-                          {DAY_LABELS.map(d => <div key={d} className="bk-cal-wd">{d}</div>)}
-                        </div>
+                <div className="bk-side-meta">
+                  <div className="bk-meta-row">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                    <span>{form.duration} min per session</span>
+                  </div>
+                  <div className="bk-meta-row">
+                    <svg viewBox="0 0 24 24"><path d="M15 10l-4 4l6 6l4-16l-18 7l4 2l2 6l3-4" /></svg>
+                    <span>Online via video call</span>
+                  </div>
+                </div>
 
-                        <div className="bk-cal-grid">
-                          {cells.map((cell, idx) => {
-                            if (!cell) return <div key={`e-${idx}`} className="bk-cal-day" />;
-                            const isPast = cell < today;
-                            const hasAv = !isPast && dayHasAvail(cell, availability);
-                            const isToday = sameDay(cell, today);
-                            const isSel = selectedDay && sameDay(cell, selectedDay);
-                            const hasSession = selectedDateKeys.has(formatDateKey(cell));
-                            return (
-                              <div
-                                key={cell.toISOString()}
-                                className={[
-                                  'bk-cal-day',
-                                  isPast || !hasAv ? 'disabled' : 'avail',
-                                  isToday && !isSel ? 'today' : '',
-                                  isSel ? 'active' : '',
-                                  hasSession ? 'has-session' : '',
-                                ].filter(Boolean).join(' ')}
-                                onClick={() => hasAv && setSelectedDay(cell)}
-                                role={hasAv ? 'button' : undefined}
-                                tabIndex={hasAv ? 0 : undefined}
-                                onKeyDown={e => hasAv && e.key === 'Enter' && setSelectedDay(cell)}
-                              >
-                                <span>{cell.getDate()}</span>
-                                {hasSession && <span className="bk-day-check">
-                                  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
-                                </span>}
-                              </div>
-                            );
-                          })}
-                        </div>
+                <div className="bk-side-desc">
+                  Personalized lesson plan, speaking practice, and progress review.
+                </div>
 
-                        <div className="bk-dur-row">
-                          <span className="bk-dur-label">Duration</span>
-                          <div className="bk-dur-chips">
-                            {DURATIONS.map(d => (
-                              <button
-                                key={d}
-                                className={`bk-dur-chip${form.duration === d ? ' on' : ''}`}
-                                onClick={() => setForm(f => ({ ...f, duration: d }))}
-                              >{d} min</button>
-                            ))}
-                          </div>
-                        </div>
+                <a className="bk-side-help" href="https://www.instagram.com/mahdieh_fhm/" target="_blank" rel="noopener noreferrer">
+                  <span className="bk-side-help-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </span>
+                  <div className="bk-side-help-text">
+                    <span className="bk-side-help-title">Need help?</span>
+                    <span className="bk-side-help-sub">Message us anytime</span>
+                  </div>
+                </a>
+              </aside>
+
+              {/* Main calendar column */}
+              <main className="bk-main">
+                {loadingBlocked ? (
+                  <div className="bk-loading">
+                    <div className="bk-loading-spin" />
+                    <span>Loading availability...</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bk-main-header">
+                      <div className="bk-main-heading">
+                        <h2 className="bk-main-title">
+                          {packageSize === 1 ? 'Pick your date & time' : `Pick ${packageSize} dates & times`}
+                        </h2>
+                        <p className="bk-main-sub">
+                          {packageSize === 1
+                            ? 'Select your preferred date and time for the session.'
+                            : `Select ${packageSize} preferred dates and times for your sessions.`}
+                        </p>
                       </div>
-
-                      {/* Time slots */}
-                      {selectedDay && (
-                        <div className="bk-times-section">
-                          <div className="bk-times-header">
-                            <span className="bk-times-date">{fmtShort(selectedDay)}</span>
-                            {sessionsOnSelectedDay > 0 && (
-                              <span className="bk-times-selected-count">{sessionsOnSelectedDay} selected</span>
-                            )}
-                          </div>
-                          <div className="bk-times-grid">
-                            {daySlots.map(slot => {
-                              const isPast = slot < new Date();
-                              const isBlkd = isSlotBlocked(slot, form.duration, blocked);
-                              const exceeds = slotExceedsAvail(slot, form.duration, dayAvail);
-                              const isChosen = selectedSlotKeys.has(slot.getTime());
-                              const disabled = !isChosen && (isPast || isBlkd || exceeds || isFull);
-                              const end = new Date(slot.getTime() + form.duration * 60_000);
-                              return (
-                                <button
-                                  key={slot.toISOString()}
-                                  className={`bk-time-pill${isChosen ? ' chosen' : ''}${disabled ? ' off' : ''}`}
-                                  disabled={disabled && !isChosen}
-                                  onClick={() => toggleSlot(slot)}
-                                  title={
-                                    isChosen ? 'Click to remove' :
-                                    isPast ? 'Past' :
-                                    isBlkd ? 'Already booked' :
-                                    exceeds ? 'Exceeds available hours' :
-                                    isFull ? `Package full (${packageSize} sessions)` :
-                                    `${fmt12(slot.getHours(), slot.getMinutes())} \u2013 ${fmt12(end.getHours(), end.getMinutes())}`
-                                  }
-                                >
-                                  {isChosen && <svg className="bk-pill-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>}
-                                  {fmt12(slot.getHours(), slot.getMinutes())}
-                                </button>
-                              );
-                            })}
-                            {daySlots.length === 0 && (
-                              <span className="bk-times-none">No time slots available for this date</span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {!selectedDay && (
-                        <div className="bk-times-empty">
-                          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-                          <span>Select a date to see times</span>
-                        </div>
-                      )}
+                      <span className="bk-main-progress">
+                        {selectedSessions.length} / {packageSize}
+                      </span>
                     </div>
 
-                    {/* Right: Reserve list */}
-                    <div className="bk-reserve">
-                      <div className="bk-reserve-header">
-                        <h3 className="bk-reserve-title">
-                          Your Sessions
-                          <span className="bk-reserve-count">{selectedSessions.length}/{packageSize}</span>
-                        </h3>
+                    <div className="bk-cal-card">
+                      <div className="bk-cal-nav">
+                        <span className="bk-cal-month">{MONTH_NAMES[viewMonth]} {viewYear}</span>
+                        <div className="bk-cal-btns">
+                          {!isCurrentMonthView && (
+                            <button className="bk-cal-today" onClick={goToToday}>Today</button>
+                          )}
+                          <button className="bk-cal-arrow" onClick={prevMonth} disabled={isCurrentMonthView} aria-label="Previous month">
+                            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
+                          </button>
+                          <button className="bk-cal-arrow" onClick={nextMonth} aria-label="Next month">
+                            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="bk-reserve-slots">
-                        {selectedSessions.map((s, i) => {
-                          const end = new Date(s.slot.getTime() + form.duration * 60_000);
+                      <div className="bk-cal-weekdays">
+                        {DAY_LABELS.map(d => <div key={d} className="bk-cal-wd">{d}</div>)}
+                      </div>
+
+                      <div className="bk-cal-grid">
+                        {cells.map((cell, idx) => {
+                          if (!cell) return <div key={`e-${idx}`} className="bk-cal-day" />;
+                          const isPast = cell < today;
+                          const hasAv = !isPast && dayHasAvail(cell, availability);
+                          const isToday = sameDay(cell, today);
+                          const isSel = selectedDay && sameDay(cell, selectedDay);
+                          const hasSession = selectedDateKeys.has(formatDateKey(cell));
                           return (
-                            <div key={s.slot.getTime()} className="bk-reserve-card" style={{ animationDelay: `${i * 50}ms` }}>
-                              <div className="bk-rc-date">
-                                <span className="bk-rc-weekday">{s.day.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-                                <span className="bk-rc-day">{s.day.getDate()}</span>
-                                <span className="bk-rc-month">{s.day.toLocaleDateString('en-US', { month: 'short' })}</span>
-                              </div>
-                              <div className="bk-rc-time">
-                                {fmt12(s.slot.getHours(), s.slot.getMinutes())} {'\u2013'} {fmt12(end.getHours(), end.getMinutes())}
-                              </div>
-                              <button className="bk-rc-remove" onClick={() => removeSession(i)} title="Remove">
-                                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                              </button>
+                            <div
+                              key={cell.toISOString()}
+                              className={[
+                                'bk-cal-day',
+                                isPast || !hasAv ? 'disabled' : 'avail',
+                                isToday && !isSel ? 'today' : '',
+                                isSel ? 'active' : '',
+                                hasSession ? 'has-session' : '',
+                              ].filter(Boolean).join(' ')}
+                              onClick={() => hasAv && setSelectedDay(cell)}
+                              role={hasAv ? 'button' : undefined}
+                              tabIndex={hasAv ? 0 : undefined}
+                              onKeyDown={e => hasAv && e.key === 'Enter' && setSelectedDay(cell)}
+                            >
+                              <span>{cell.getDate()}</span>
+                              {hasSession && <span className="bk-day-check">
+                                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                              </span>}
                             </div>
                           );
                         })}
-                        {Array.from({ length: packageSize - selectedSessions.length }).map((_, i) => (
-                          <div key={`empty-${i}`} className="bk-reserve-empty">
-                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                          </div>
-                        ))}
                       </div>
 
-                      {selectedSessions.length > 0 && (
-                        <button className="bk-reserve-continue" onClick={() => setStep('form')}>
-                          Continue
-                          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-                        </button>
-                      )}
+                      <div className="bk-dur-row">
+                        <span className="bk-dur-label">Duration</span>
+                        <div className="bk-dur-chips">
+                          {DURATIONS.map(d => (
+                            <button
+                              key={d}
+                              className={`bk-dur-chip${form.duration === d ? ' on' : ''}`}
+                              onClick={() => setForm(f => ({ ...f, duration: d }))}
+                            >{d} min</button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
+
+                    {/* Time slots */}
+                    {selectedDay ? (
+                      <div className="bk-times-section">
+                        <div className="bk-times-header">
+                          <span className="bk-times-date">{fmtShort(selectedDay)}</span>
+                          {sessionsOnSelectedDay > 0 && (
+                            <span className="bk-times-selected-count">{sessionsOnSelectedDay} selected</span>
+                          )}
+                        </div>
+                        <div className="bk-times-grid">
+                          {daySlots.map(slot => {
+                            const isPast = slot < new Date();
+                            const isBlkd = isSlotBlocked(slot, form.duration, blocked);
+                            const exceeds = slotExceedsAvail(slot, form.duration, dayAvail);
+                            const isChosen = selectedSlotKeys.has(slot.getTime());
+                            const disabled = !isChosen && (isPast || isBlkd || exceeds || isFull);
+                            const end = new Date(slot.getTime() + form.duration * 60_000);
+                            return (
+                              <button
+                                key={slot.toISOString()}
+                                className={`bk-time-pill${isChosen ? ' chosen' : ''}${disabled ? ' off' : ''}`}
+                                disabled={disabled && !isChosen}
+                                onClick={() => toggleSlot(slot)}
+                                title={
+                                  isChosen ? 'Click to remove' :
+                                  isPast ? 'Past' :
+                                  isBlkd ? 'Already booked' :
+                                  exceeds ? 'Exceeds available hours' :
+                                  isFull ? `Package full (${packageSize} sessions)` :
+                                  `${fmt12(slot.getHours(), slot.getMinutes())} \u2013 ${fmt12(end.getHours(), end.getMinutes())}`
+                                }
+                              >
+                                {isChosen && <svg className="bk-pill-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>}
+                                {fmt12(slot.getHours(), slot.getMinutes())}
+                              </button>
+                            );
+                          })}
+                          {daySlots.length === 0 && (
+                            <span className="bk-times-none">No time slots available for this date</span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bk-times-empty">
+                        <span className="bk-times-empty-icon">
+                          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                        </span>
+                        <div className="bk-times-empty-text">
+                          <span className="bk-times-empty-title">Select a date to see available times</span>
+                          <span className="bk-times-empty-sub">Choose a date from the calendar to see times</span>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </main>
+
+              {/* Right: session slots column */}
+              <aside className="bk-reserve">
+                <div className="bk-reserve-header">
+                  <h3 className="bk-reserve-title">Your Sessions</h3>
+                  <span className="bk-reserve-count">{selectedSessions.length}/{packageSize}</span>
+                </div>
+
+                <div className="bk-reserve-slots">
+                  {Array.from({ length: packageSize }).map((_, i) => {
+                    const s = selectedSessions[i];
+                    if (s) {
+                      const end = new Date(s.slot.getTime() + form.duration * 60_000);
+                      return (
+                        <div key={s.slot.getTime()} className="bk-slot bk-slot-filled" style={{ animationDelay: `${i * 40}ms` }}>
+                          <span className="bk-slot-num">{i + 1}</span>
+                          <div className="bk-slot-body">
+                            <span className="bk-slot-date">{s.day.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                            <span className="bk-slot-time">{fmt12(s.slot.getHours(), s.slot.getMinutes())} {'\u2013'} {fmt12(end.getHours(), end.getMinutes())}</span>
+                          </div>
+                          <button className="bk-slot-remove" onClick={() => removeSession(i)} title="Remove session">
+                            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                          </button>
+                        </div>
+                      );
+                    }
+                    const isNext = i === selectedSessions.length;
+                    return (
+                      <div key={`empty-${i}`} className={`bk-slot bk-slot-empty${isNext ? ' next' : ''}`}>
+                        <span className="bk-slot-num">{i + 1}</span>
+                        <span className="bk-slot-placeholder">Choose a date &amp; time</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {selectedSessions.length > 0 && (
+                  <button className="bk-reserve-continue" onClick={() => setStep('form')}>
+                    {selectedSessions.length < packageSize
+                      ? `Continue with ${selectedSessions.length} of ${packageSize}`
+                      : 'Continue'}
+                    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                  </button>
+                )}
+              </aside>
+            </div>
+
+            <div className="bk-tip">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+              <span><strong>Tip:</strong> Pick times when you can focus on your sessions without distractions.</span>
             </div>
           </div>
         )}
@@ -566,14 +632,15 @@ export default function BookingPage() {
         {/* ═══ FORM ═══ */}
         {step === 'form' && (
           <div className="bk-form-view">
-            <div className="bk-side">
+            <div className="bk-form-shell">
+              <aside className="bk-side">
               <Link href="/" className="bk-logo">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/logo.webp" alt="ESL Here" />
               </Link>
               <div className="bk-side-title">English Tutoring</div>
               <div className="bk-side-host">
-                <img className="bk-host-avatar" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1781136000&v=beta&t=ywWNGDr4RcJF_XppKSQuQmASzybBgkBjgrN8SyfeOkY" alt="Mahdieh Fahimpour" />
+                <img className="bk-host-avatar" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1782950400&v=beta&t=i_7sNLcYJNyZ0ZcSHb7WhHEEwLBDmjB9cCn1-9e77zc" alt="Mahdieh Fahimpour" />
                 <span className="bk-host-name">Mahdieh Fahimpour</span>
               </div>
 
@@ -590,15 +657,18 @@ export default function BookingPage() {
                   );
                 })}
               </div>
-            </div>
+              </aside>
 
-            <div className="bk-form-panel">
+              <main className="bk-form-panel">
               <button className="bk-back" onClick={() => setStep('select')}>
                 <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
                 Back
               </button>
 
-              <h2 className="bk-form-title">Enter your details</h2>
+              <div className="bk-form-head">
+                <h2 className="bk-form-title">Enter your details</h2>
+                <p className="bk-form-sub">We&apos;ll use this to confirm your booking and send your session details.</p>
+              </div>
 
               <form onSubmit={(e) => { e.preventDefault(); setStep('checkout'); }} noValidate>
                 <div className="bk-form-grid">
@@ -635,11 +705,12 @@ export default function BookingPage() {
                 <div className="bk-form-actions">
                   <button type="submit" className="bk-submit"
                     disabled={!form.name || !form.email || !form.topic}>
+                    Continue to payment
                     <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-                    Continue to Payment
                   </button>
                 </div>
               </form>
+              </main>
             </div>
           </div>
         )}
@@ -717,7 +788,7 @@ export default function BookingPage() {
               <div className="bk-side-title">English Tutoring</div>
               <div className="bk-side-host">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="bk-host-avatar" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1781136000&v=beta&t=ywWNGDr4RcJF_XppKSQuQmASzybBgkBjgrN8SyfeOkY" alt="Mahdieh Fahimpour" />
+                <img className="bk-host-avatar" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1782950400&v=beta&t=i_7sNLcYJNyZ0ZcSHb7WhHEEwLBDmjB9cCn1-9e77zc" alt="Mahdieh Fahimpour" />
                 <span className="bk-host-name">Mahdieh Fahimpour</span>
               </div>
             </div>
@@ -793,7 +864,7 @@ export default function BookingPage() {
               <div className="bk-side-title">English Tutoring</div>
               <div className="bk-side-host">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="bk-host-avatar" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1781136000&v=beta&t=ywWNGDr4RcJF_XppKSQuQmASzybBgkBjgrN8SyfeOkY" alt="Mahdieh Fahimpour" />
+                <img className="bk-host-avatar" src="https://media.licdn.com/dms/image/v2/D4E03AQEcqLWKYx6Xqg/profile-displayphoto-crop_800_800/B4EZsTpXe0GoAI-/0/1765561171295?e=1782950400&v=beta&t=i_7sNLcYJNyZ0ZcSHb7WhHEEwLBDmjB9cCn1-9e77zc" alt="Mahdieh Fahimpour" />
                 <span className="bk-host-name">Mahdieh Fahimpour</span>
               </div>
             </div>

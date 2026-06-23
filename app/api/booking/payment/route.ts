@@ -1,26 +1,4 @@
-import { readJsonFile, writeJsonFile } from '@/lib/data';
-
-interface BookingRequest {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  topic: string;
-  notes?: string;
-  date: string;
-  duration: number;
-  status: 'pending' | 'confirmed' | 'canceled';
-  createdAt: string;
-  packageSize?: number;
-  amount?: number;
-}
-
-interface ClassRecord {
-  id: string;
-  date: string;
-  duration: number;
-  status: string;
-}
+import { db } from '@/lib/db';
 
 interface SessionInput {
   date: string;
@@ -50,8 +28,15 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
-    const classes = readJsonFile<ClassRecord[]>('classes.json', []);
-    const bookings = readJsonFile<BookingRequest[]>('bookings.json', []);
+    const [classes, bookings] = await Promise.all([
+      db.class.findMany({ where: { status: { not: 'CANCELED' } } }),
+      db.booking.findMany({ where: { status: { not: 'CANCELED' } } }),
+    ]);
+
+    const allBlocked = [
+      ...classes.map((c) => ({ date: c.date, duration: c.duration })),
+      ...bookings.map((b) => ({ date: b.date, duration: b.duration })),
+    ];
 
     // Check all sessions for overlaps
     for (const session of sessions) {
@@ -62,13 +47,8 @@ export async function POST(request: Request) {
         return Response.json({ error: 'Cannot book a session in the past.' }, { status: 400 });
       }
 
-      const allBlocked = [
-        ...classes.filter(c => c.status !== 'canceled'),
-        ...bookings.filter(b => b.status !== 'canceled'),
-      ];
-
-      const overlap = allBlocked.find(c => {
-        const s = new Date(c.date).getTime();
+      const overlap = allBlocked.find((c) => {
+        const s = c.date.getTime();
         const e = s + c.duration * 60_000;
         return newStart < e && newEnd > s;
       });
@@ -76,41 +56,30 @@ export async function POST(request: Request) {
       if (overlap) {
         return Response.json(
           { error: 'One or more time slots are already booked. Please choose different times.' },
-          { status: 409 },
+          { status: 409 }
         );
       }
     }
 
     // Save all sessions as pending bookings
-    const existingIds = bookings.map(b => {
-      const m = b.id.match(/^bkg(\d+)$/);
-      return m ? parseInt(m[1], 10) : 0;
-    });
-    let nextNum = Math.max(0, ...existingIds) + 1;
-
-    for (const session of sessions) {
-      const newId = `bkg${String(nextNum++).padStart(3, '0')}`;
-      bookings.push({
-        id: newId,
+    await db.booking.createMany({
+      data: sessions.map((session) => ({
         name: name.trim(),
         email: email.trim().toLowerCase(),
         ...(phone ? { phone: phone.trim() } : {}),
         topic: topic.trim(),
         ...(notes ? { notes: notes.trim() } : {}),
-        date: session.date,
+        date: new Date(session.date),
         duration: Number(session.duration),
-        status: 'pending',
-        createdAt: new Date().toISOString(),
+        status: 'PENDING' as const,
         packageSize,
         amount,
-      });
-    }
-
-    writeJsonFile('bookings.json', bookings);
+      })),
+    });
 
     // TODO: Integrate with a real Shaparak payment gateway (e.g. ZarinPal, IDPay, etc.)
     // For now, construct a placeholder redirect URL
-    const paymentUrl = `https://shaparak.ir/payment?amount=${amount}&ref=${nextNum}`;
+    const paymentUrl = `https://shaparak.ir/payment?amount=${amount}&ref=${Date.now()}`;
 
     return Response.json({ paymentUrl }, { status: 200 });
   } catch {

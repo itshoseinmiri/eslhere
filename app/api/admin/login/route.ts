@@ -7,7 +7,7 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Invalid password' }, { status: 401 });
     }
     const tokenData = generateToken();
-    saveAdminData(tokenData);
+    await saveAdminData(tokenData);
     return Response.json(tokenData);
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });

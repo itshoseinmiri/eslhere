@@ -1,13 +1,14 @@
 import { verifyToken } from '@/lib/auth';
-import { readJsonFile } from '@/lib/data';
+import { db } from '@/lib/db';
+import { serializeRegistration } from '@/lib/serialize';
 
 export async function GET(request: Request) {
-  if (!verifyToken(request)) {
+  if (!(await verifyToken(request))) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {
-    const users = readJsonFile<Record<string, unknown>[]>('users.json', []);
-    return Response.json(users.filter(u => u.firstName && u.email));
+    const registrations = await db.registration.findMany({ orderBy: { registeredAt: 'asc' } });
+    return Response.json(registrations.map(serializeRegistration));
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }
