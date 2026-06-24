@@ -1,5 +1,6 @@
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
+import type { Availability } from '@prisma/client';
 
 // GET — return all availability slots (admin-only)
 export async function GET(request: Request) {
@@ -11,7 +12,7 @@ export async function GET(request: Request) {
     const availability = await db.availability.findMany({
       orderBy: [{ date: 'asc' }, { start: 'asc' }],
     });
-    return Response.json(availability.map((a) => ({ date: a.date, start: a.start, end: a.end })));
+    return Response.json(availability.map((a: Availability) => ({ date: a.date, start: a.start, end: a.end })));
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     const newStartMins = sH * 60 + sM;
     const newEndMins = eH * 60 + eM;
     const sameDate = await db.availability.findMany({ where: { date } });
-    const overlap = sameDate.find((a) => {
+    const overlap = sameDate.find((a: Availability) => {
       const [aH, aM] = a.start.split(':').map(Number);
       const [bH, bM] = a.end.split(':').map(Number);
       const aStart = aH * 60 + aM;
