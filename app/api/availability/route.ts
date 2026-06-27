@@ -1,6 +1,6 @@
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
-import type { Availability } from '@prisma/client';
+import type { Availability } from '@/lib/types';
 
 // GET — return all availability slots (admin-only)
 export async function GET(request: Request) {

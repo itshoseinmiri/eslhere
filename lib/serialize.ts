@@ -1,6 +1,6 @@
-// Maps Prisma rows to the legacy JSON response shapes the frontend expects
+// Maps stored rows to the legacy JSON response shapes the frontend expects
 // (lowercase status strings, inline dates/reviews/points arrays, etc.) so the
-// storage layer can move to Postgres without changing any client code.
+// storage layer can change without touching any client code.
 import type {
   Student,
   Class,
@@ -15,7 +15,7 @@ import type {
   BookingStatus,
   DiscussionStatus,
   RegistrationType,
-} from "@prisma/client";
+} from "@/lib/types";
 
 // ── status <-> string ──
 export function jsonToClassStatus(s: string): ClassStatus {

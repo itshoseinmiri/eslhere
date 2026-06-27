@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import type { DiscussionUpdateInput } from '@/lib/types';
 import { verifyToken } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { serializeDiscussion, jsonToDiscussionStatus } from '@/lib/serialize';
@@ -45,7 +45,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!existing) return Response.json({ error: 'Not found' }, { status: 404 });
 
     const body = await request.json();
-    const data: Prisma.DiscussionUpdateInput = {};
+    const data: DiscussionUpdateInput = {};
 
     if (body.topic !== undefined) data.topic = String(body.topic).trim();
     if (body.level !== undefined) data.level = body.level;
