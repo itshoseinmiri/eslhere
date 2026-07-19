@@ -3,19 +3,24 @@
 import { useEffect, useState } from 'react';
 import { useAdmin } from './admin-context';
 
-interface Registration {
-  type: string; firstName: string; lastName: string; email: string; phone: string;
-  age: number; englishLevel: string; job: string; purpose?: string;
-  whyPrivate?: string; whyGroup?: string; topics?: string; registeredAt?: string;
+interface AuthUser {
+  id: string;
+  email: string;
+  createdAt: string;
+  lastSignInAt: string | null;
+  confirmed: boolean;
 }
 
-const REGS_PER_PAGE = 10;
+const USERS_PER_PAGE = 10;
 
+function fmtDate(iso: string | null) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
-export default function RegistrationsPage() {
+export default function AdminsPage() {
   const { token, logout } = useAdmin();
-  const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [purposeModal, setPurposeModal] = useState<string | null>(null);
+  const [users, setUsers] = useState<AuthUser[]>([]);
   const [toast, setToast] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,7 +28,7 @@ export default function RegistrationsPage() {
 
   useEffect(() => {
     if (!token) return;
-    loadRegistrations();
+    loadUsers();
   }, [token]);
 
   useEffect(() => {
@@ -33,31 +38,27 @@ export default function RegistrationsPage() {
     return () => document.removeEventListener('click', close);
   }, [openMenu]);
 
-  async function loadRegistrations() {
+  async function loadUsers() {
     try {
-      const res = await fetch('/api/registrations', { headers: { Authorization: 'Bearer ' + token } });
+      const res = await fetch('/api/users', { headers: { Authorization: 'Bearer ' + token } });
       if (res.status === 401) { logout(); return; }
       if (!res.ok) throw new Error();
-      setRegistrations(await res.json());
-    } catch { showToast('Failed to load registrations.'); }
+      setUsers(await res.json());
+    } catch { showToast('Failed to load users.'); }
   }
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000); }
 
-  const filteredRegs = registrations.filter(u => {
+  const filteredUsers = users.filter(u => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
-    return (u.firstName + ' ' + u.lastName).toLowerCase().includes(term) ||
-      u.email.toLowerCase().includes(term) ||
-      u.phone.includes(term) ||
-      u.englishLevel.toLowerCase().includes(term) ||
-      u.job.toLowerCase().includes(term);
+    return u.email.toLowerCase().includes(term) || u.id.toLowerCase().includes(term);
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredRegs.length / REGS_PER_PAGE));
-  const pagedRegs = filteredRegs.slice((currentPage - 1) * REGS_PER_PAGE, currentPage * REGS_PER_PAGE);
-  const showFrom = filteredRegs.length === 0 ? 0 : (currentPage - 1) * REGS_PER_PAGE + 1;
-  const showTo = Math.min(currentPage * REGS_PER_PAGE, filteredRegs.length);
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
+  const pagedUsers = filteredUsers.slice((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE);
+  const showFrom = filteredUsers.length === 0 ? 0 : (currentPage - 1) * USERS_PER_PAGE + 1;
+  const showTo = Math.min(currentPage * USERS_PER_PAGE, filteredUsers.length);
 
   return (
     <>
@@ -164,6 +165,11 @@ export default function RegistrationsPage() {
           color: #1a2e44;
           white-space: nowrap;
         }
+        .rl-id-text {
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          font-size: 0.6875rem;
+          color: #8ba3b5;
+        }
 
         /* ── Badges ── */
         .rl-type-badge {
@@ -177,6 +183,8 @@ export default function RegistrationsPage() {
         }
         .rl-type-badge.private { background: #f5f3ff; color: #7c3aed; }
         .rl-type-badge.group { background: #eff6ff; color: #2563eb; }
+        .rl-type-badge.confirmed { background: #ecfdf5; color: #059669; }
+        .rl-type-badge.pending { background: #fffbeb; color: #d97706; }
         .rl-level-badge {
           display: inline-block;
           padding: 2px 9px;
@@ -343,71 +351,6 @@ export default function RegistrationsPage() {
           margin-top: 6px;
         }
 
-        /* ── Modal ── */
-        .rl-modal-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(26,46,68,0.2);
-          backdrop-filter: blur(4px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 200;
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.2s, visibility 0.2s;
-        }
-        .rl-modal-overlay.show {
-          opacity: 1;
-          visibility: visible;
-        }
-        .rl-modal-box {
-          background: #fff;
-          border-radius: 10px;
-          width: 90%;
-          max-width: 460px;
-          padding: 28px;
-          box-shadow: 0 20px 60px rgba(26,46,68,0.12);
-          transform: scale(0.96);
-          transition: transform 0.2s;
-        }
-        .rl-modal-overlay.show .rl-modal-box { transform: scale(1); }
-        .rl-modal-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 18px;
-        }
-        .rl-modal-header h3 {
-          font-family: 'Poppins', sans-serif;
-          font-size: 1rem;
-          font-weight: 600;
-          color: #1a2e44;
-        }
-        .rl-modal-close {
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 4px;
-          color: #b8c9d6;
-          transition: color 0.15s;
-        }
-        .rl-modal-close:hover { color: #1a2e44; }
-        .rl-modal-close svg {
-          width: 18px;
-          height: 18px;
-          stroke: currentColor;
-          stroke-width: 2;
-          fill: none;
-        }
-        .rl-modal-body {
-          font-family: 'Poppins', sans-serif;
-          font-size: 0.875rem;
-          color: #5f7a8f;
-          line-height: 1.7;
-          word-break: break-word;
-        }
-
         /* ── Toast ── */
         .rl-toast {
           position: fixed;
@@ -437,8 +380,8 @@ export default function RegistrationsPage() {
       {/* Header */}
       <div className="rl-header">
         <div>
-          <h2 className="rl-title">Registrations</h2>
-          <p className="rl-subtitle">Manage all received registrations and their details.</p>
+          <h2 className="rl-title">Admins</h2>
+          <p className="rl-subtitle">Admin accounts with access to this panel.</p>
         </div>
       </div>
 
@@ -449,7 +392,7 @@ export default function RegistrationsPage() {
           <input
             type="text"
             className="rl-search"
-            placeholder="Search by name, email, or phone..."
+            placeholder="Search by email or ID..."
             value={searchTerm}
             onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
           />
@@ -457,19 +400,19 @@ export default function RegistrationsPage() {
       </div>
 
       {/* Table */}
-      {filteredRegs.length === 0 ? (
+      {filteredUsers.length === 0 ? (
         <div className="rl-empty">
           {searchTerm ? (
             <>
               <svg viewBox="0 0 48 48"><circle cx="20" cy="20" r="14"/><line x1="30" y1="30" x2="42" y2="42"/><line x1="14" y1="20" x2="26" y2="20"/></svg>
-              <div className="rl-empty-title">No registrations match your search</div>
+              <div className="rl-empty-title">No admins match your search</div>
               <div className="rl-empty-hint">Try a different keyword or clear the filter</div>
             </>
           ) : (
             <>
-              <svg viewBox="0 0 48 48"><rect x="10" y="4" width="28" height="40" rx="3"/><line x1="17" y1="14" x2="31" y2="14"/><line x1="17" y1="21" x2="31" y2="21"/><line x1="17" y1="28" x2="25" y2="28"/></svg>
-              <div className="rl-empty-title">No registrations yet</div>
-              <div className="rl-empty-hint">New submissions will appear here</div>
+              <svg viewBox="0 0 48 48"><circle cx="24" cy="17" r="8"/><path d="M10 42a14 14 0 0 1 28 0"/></svg>
+              <div className="rl-empty-title">No admin users yet</div>
+              <div className="rl-empty-hint">Add users in Supabase ▸ Authentication ▸ Users</div>
             </>
           )}
         </div>
@@ -479,50 +422,36 @@ export default function RegistrationsPage() {
             <table className="rl-table">
               <thead>
                 <tr>
-                  <th>Type</th>
-                  <th>Name</th>
                   <th>Email</th>
-                  <th>Phone</th>
-                  <th>Level</th>
-                  <th>Role</th>
-                  <th>Date</th>
+                  <th>Status</th>
+                  <th>User ID</th>
+                  <th>Created</th>
+                  <th>Last sign-in</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                {pagedRegs.map((u, i) => {
-                  const dateStr = u.registeredAt ? new Date(u.registeredAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '\u2014';
-                  const purposeText = u.purpose || u.whyPrivate || u.whyGroup || u.topics || '';
-                  const rowIdx = (currentPage - 1) * REGS_PER_PAGE + i;
+                {pagedUsers.map((u, i) => {
+                  const rowIdx = (currentPage - 1) * USERS_PER_PAGE + i;
                   return (
-                    <tr key={rowIdx}>
-                      <td><span className={`rl-type-badge ${u.type === 'private' ? 'private' : 'group'}`}>{u.type || 'private'}</span></td>
-                      <td>
-                        <span className="rl-name-text">{u.firstName} {u.lastName}</span>
-                      </td>
-                      <td>{u.email}</td>
-                      <td>{u.phone}</td>
-                      <td><span className="rl-level-badge">{u.englishLevel}</span></td>
-                      <td>{u.job}</td>
-                      <td className="rl-date-cell">{dateStr}</td>
+                    <tr key={u.id}>
+                      <td><span className="rl-name-text">{u.email}</span></td>
+                      <td><span className={`rl-type-badge ${u.confirmed ? 'confirmed' : 'pending'}`}>{u.confirmed ? 'confirmed' : 'pending'}</span></td>
+                      <td><span className="rl-id-text">{u.id}</span></td>
+                      <td className="rl-date-cell">{fmtDate(u.createdAt)}</td>
+                      <td className="rl-date-cell">{u.lastSignInAt ? fmtDate(u.lastSignInAt) : 'Never'}</td>
                       <td>
                         <div className="rl-menu-wrap">
                           <button className="rl-menu-btn" onClick={e => { e.stopPropagation(); setOpenMenu(openMenu === rowIdx ? null : rowIdx); }}>&#x22EF;</button>
                           {openMenu === rowIdx && (
                             <div className="rl-menu-dropdown" onClick={e => e.stopPropagation()}>
-                              {purposeText && (
-                                <button className="rl-menu-item" onClick={() => { setPurposeModal(purposeText); setOpenMenu(null); }}>
-                                  <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                  View Purpose
-                                </button>
-                              )}
                               <button className="rl-menu-item" onClick={() => { window.location.href = 'mailto:' + u.email; setOpenMenu(null); }}>
                                 <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                                 Send Email
                               </button>
-                              <button className="rl-menu-item" onClick={() => { navigator.clipboard.writeText(u.phone); showToast('Phone copied'); setOpenMenu(null); }}>
-                                <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                Copy Phone
+                              <button className="rl-menu-item" onClick={() => { navigator.clipboard.writeText(u.id); showToast('User ID copied'); setOpenMenu(null); }}>
+                                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                Copy User ID
                               </button>
                             </div>
                           )}
@@ -538,7 +467,7 @@ export default function RegistrationsPage() {
           {/* Pagination */}
           <div className="rl-pagination">
             <span className="rl-pagination-info">
-              Showing {showFrom} to {showTo} of {filteredRegs.length} registrations
+              Showing {showFrom} to {showTo} of {filteredUsers.length} admins
             </span>
             <div className="rl-pagination-btns">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
@@ -548,19 +477,6 @@ export default function RegistrationsPage() {
           </div>
         </>
       )}
-
-      {/* Purpose Modal */}
-      <div className={`rl-modal-overlay ${purposeModal !== null ? 'show' : ''}`} onClick={() => setPurposeModal(null)}>
-        <div className="rl-modal-box" onClick={e => e.stopPropagation()}>
-          <div className="rl-modal-header">
-            <h3>Purpose / Topics</h3>
-            <button className="rl-modal-close" onClick={() => setPurposeModal(null)}>
-              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-          <div className="rl-modal-body">{purposeModal}</div>
-        </div>
-      </div>
 
       <div className={`rl-toast ${toast ? 'show' : ''}`} style={{ visibility: toast ? 'visible' : 'hidden' }}>{toast}</div>
     </>

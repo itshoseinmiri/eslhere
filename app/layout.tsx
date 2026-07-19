@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SplashScreen from "./splash-screen";
 
 export const metadata: Metadata = {
   title: "ESL Here - English Class Registration",
@@ -24,7 +25,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <SplashScreen />
+      </body>
     </html>
   );
 }

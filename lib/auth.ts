@@ -1,49 +1,78 @@
-import { createHash, randomBytes, timingSafeEqual } from 'crypto';
-import { db } from '@/lib/db';
+// Admin auth backed by Supabase Auth.
+//
+// The app keeps its existing transport: the browser stores a bearer token in
+// localStorage and sends it as `Authorization: Bearer <jwt>`; every admin API
+// route gates on verifyToken(). What changed is the credential — the token is
+// now a Supabase access token (JWT) instead of a random string in the mock store.
+//
+// Single admin: the login form stays password-only. The email is fixed via the
+// ADMIN_EMAIL env and paired with the typed password for signInWithPassword().
+// Create that user (confirmed) in Supabase ▸ Authentication ▸ Users.
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const ADMIN_ID = 'admin';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-const ADMIN_HASH = createHash('sha256').update(ADMIN_PASSWORD).digest('hex');
-
-export function verifyPassword(pw: string): boolean {
-  const hash = createHash('sha256').update(pw).digest('hex');
-  return timingSafeEqual(Buffer.from(hash), Buffer.from(ADMIN_HASH));
+// Stateless client — never persists a session; we pass tokens explicitly.
+let _client: SupabaseClient | null = null;
+function authClient(): SupabaseClient {
+  if (!_client) {
+    _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  }
+  return _client;
 }
 
-export async function getAdminData(): Promise<{ access_token: string | null; expired_at: string | null }> {
-  const admin = await db.adminSession.findUnique({ where: { id: ADMIN_ID } });
-  return {
-    access_token: admin?.accessToken ?? null,
-    expired_at: admin?.expiredAt ? admin.expiredAt.toISOString() : null,
-  };
+function configured(): boolean {
+  return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 }
 
-export async function saveAdminData(data: { access_token: string | null; expired_at: string | null }) {
-  const accessToken = data.access_token;
-  const expiredAt = data.expired_at ? new Date(data.expired_at) : null;
-  await db.adminSession.upsert({
-    where: { id: ADMIN_ID },
-    create: { id: ADMIN_ID, accessToken, expiredAt },
-    update: { accessToken, expiredAt },
+// Decode the `exp` claim (unix seconds) from a JWT WITHOUT verifying — used only
+// to drive the admin session countdown. verifyToken() does the real validation.
+export function tokenExpiry(token: string): string | null {
+  try {
+    const payload = token.split('.')[1];
+    const b64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const json = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
+    return json.exp ? new Date(json.exp * 1000).toISOString() : null;
+  } catch {
+    return null;
+  }
+}
+
+// Sign an admin in with the submitted email + password. Falls back to the
+// ADMIN_EMAIL env when no email is provided (password-only forms).
+export async function signInAdmin(
+  email: string,
+  password: string,
+): Promise<{ access_token: string; expired_at: string | null } | null> {
+  const loginEmail = email || ADMIN_EMAIL;
+  if (!configured() || !loginEmail || !password) return null;
+  const { data, error } = await authClient().auth.signInWithPassword({
+    email: loginEmail,
+    password,
   });
+  if (error || !data.session) return null;
+  const access_token = data.session.access_token;
+  return { access_token, expired_at: tokenExpiry(access_token) };
 }
 
+// Validate the bearer token against the Supabase Auth API. Returns false when
+// missing, malformed, expired, or when auth is not yet configured.
 export async function verifyToken(request: Request): Promise<boolean> {
   const auth = request.headers.get('authorization');
   if (!auth || !auth.startsWith('Bearer ')) return false;
+  if (!configured()) return false;
   const token = auth.slice(7);
-  const admin = await getAdminData();
-  if (!admin.access_token || admin.access_token !== token) return false;
-  if (!admin.expired_at || new Date(admin.expired_at).getTime() < Date.now()) {
-    await saveAdminData({ access_token: null, expired_at: null });
-    return false;
-  }
-  return true;
+  const { data, error } = await authClient().auth.getUser(token);
+  return !error && Boolean(data.user);
 }
 
-export function generateToken(): { access_token: string; expired_at: string } {
-  const access_token = randomBytes(32).toString('hex');
-  const expired_at = new Date(Date.now() + 20 * 60 * 1000).toISOString();
-  return { access_token, expired_at };
+// Pull the bearer token off a request (for callers that need the raw JWT, e.g.
+// to read its expiry after verifyToken() has already validated it).
+export function bearerToken(request: Request): string | null {
+  const auth = request.headers.get('authorization');
+  return auth?.startsWith('Bearer ') ? auth.slice(7) : null;
 }

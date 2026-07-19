@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { createRegistration, discussionExists } from '@/lib/supabase/queries';
 import { jsonToRegistrationType } from '@/lib/serialize';
 
 export async function POST(request: Request) {
@@ -14,25 +14,31 @@ export async function POST(request: Request) {
       }
     }
 
-    await db.registration.create({
-      data: {
-        type: jsonToRegistrationType(user.type),
-        firstName: String(user.firstName),
-        lastName: String(user.lastName),
-        email: String(user.email),
-        phone: String(user.phone),
-        englishLevel: String(user.englishLevel),
-        age: user.age != null ? String(user.age) : null,
-        job: user.job != null ? String(user.job) : null,
-        whyPrivate: user.whyPrivate != null ? String(user.whyPrivate) : null,
-        purpose: user.purpose != null ? String(user.purpose) : null,
-        whyGroup: user.whyGroup != null ? String(user.whyGroup) : null,
-        topics: user.topics != null ? String(user.topics) : null,
-        discussionId: typeof user.discussionId === 'number' ? user.discussionId : null,
-        discussionTopic: user.discussionTopic != null ? String(user.discussionTopic) : null,
-        priorExperience: user.priorExperience != null ? String(user.priorExperience) : null,
-        goals: user.goals != null ? String(user.goals) : null,
-      },
+    // Only link a discussion the FK can satisfy. A stale/deleted id would raise a
+    // foreign-key violation on insert; keep the lead (with discussionTopic) and
+    // drop the dangling link instead of failing the whole registration.
+    let discussionId = typeof user.discussionId === 'number' ? user.discussionId : null;
+    if (discussionId != null && !(await discussionExists(discussionId))) {
+      discussionId = null;
+    }
+
+    await createRegistration({
+      type: jsonToRegistrationType(user.type),
+      firstName: String(user.firstName),
+      lastName: String(user.lastName),
+      email: String(user.email),
+      phone: String(user.phone),
+      englishLevel: String(user.englishLevel),
+      age: user.age != null ? String(user.age) : null,
+      job: user.job != null ? String(user.job) : null,
+      whyPrivate: user.whyPrivate != null ? String(user.whyPrivate) : null,
+      purpose: user.purpose != null ? String(user.purpose) : null,
+      whyGroup: user.whyGroup != null ? String(user.whyGroup) : null,
+      topics: user.topics != null ? String(user.topics) : null,
+      discussionId,
+      discussionTopic: user.discussionTopic != null ? String(user.discussionTopic) : null,
+      priorExperience: user.priorExperience != null ? String(user.priorExperience) : null,
+      goals: user.goals != null ? String(user.goals) : null,
     });
 
     return Response.json({ success: true });

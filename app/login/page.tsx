@@ -16,6 +16,7 @@ const getServerSnapshot = () => false;
 export default function LoginPage() {
   const router = useRouter();
   const mounted = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -43,7 +44,7 @@ export default function LoginPage() {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (res.status === 401) {
@@ -91,8 +92,20 @@ export default function LoginPage() {
       <div className="login-box">
         <img src="/images/logo.webp" alt="ESL Here" className="login-logo" />
         <h2>Admin Access</h2>
-        <p>Enter your password to view admin panel</p>
+        <p>Enter your email and password to view admin panel</p>
         <form onSubmit={handleSubmit} noValidate autoComplete="off">
+          <div className="field">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="Enter email"
+              required
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
           <div className="field">
             <label htmlFor="password">Password</label>
             <input

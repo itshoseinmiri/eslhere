@@ -2,6 +2,8 @@
 
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './home.css';
 
 export default function Home() {
@@ -24,6 +26,7 @@ function HomeContent() {
   const logoRef = useRef<HTMLImageElement>(null);
   const logoClicksRef = useRef(0);
   const logoTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const homeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -39,6 +42,61 @@ function HomeContent() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+        tl.from('.hero-line-inner:not(.hero-accent)', { yPercent: 112, duration: 0.85, stagger: 0.14 })
+          .fromTo('.hero-accent',
+            { clipPath: 'inset(-20% 100% -30% 0)' },
+            { clipPath: 'inset(-20% -10% -30% 0)', duration: 1, ease: 'power2.inOut' }, '-=0.3')
+          .from('.hero-sub', { y: 26, opacity: 0, duration: 0.6, ease: 'power3.out' }, '-=0.55')
+          .from('.hero-actions > *', { y: 20, opacity: 0, duration: 0.5, stagger: 0.09, ease: 'power3.out', clearProps: 'transform,opacity' }, '-=0.4')
+          .from('.hero-feats li', { y: 14, opacity: 0, duration: 0.45, stagger: 0.07, ease: 'power3.out' }, '-=0.35')
+          .from('.hero-art', { y: 40, opacity: 0, scale: 0.96, duration: 0.9, ease: 'power3.out' }, 0.25);
+
+        gsap.to('.hero-art img', { y: -10, duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.6 });
+
+        gsap.to('.hero-art', {
+          yPercent: -8, ease: 'none',
+          scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
+        });
+        gsap.to('.hero-copy', {
+          yPercent: 7, opacity: 0.45, ease: 'none',
+          scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom 30%', scrub: 0.6 },
+        });
+
+        const btl = gsap.timeline({
+          scrollTrigger: { trigger: '.class-banner', start: 'top 80%', once: true },
+          defaults: { ease: 'power3.out' },
+        });
+        btl.from('.class-banner', { y: 64, opacity: 0, scale: 0.985, duration: 0.85 })
+          .from('.class-banner-label', { y: 18, opacity: 0, duration: 0.45 }, '-=0.45')
+          .from('.class-banner-copy h2', { y: 24, opacity: 0, duration: 0.55 }, '-=0.32')
+          .from('.class-banner-copy p', { y: 20, opacity: 0, duration: 0.5 }, '-=0.4')
+          .from('.class-banner-feats li', { y: 16, opacity: 0, scale: 0.94, duration: 0.4, stagger: 0.08, ease: 'back.out(1.6)' }, '-=0.35')
+          .from('.class-banner-cta', { y: 16, opacity: 0, duration: 0.45 }, '-=0.25')
+          .from('.class-banner-art img', { x: 48, opacity: 0, duration: 0.9, ease: 'power2.out' }, 0.25);
+
+        gsap.to('.class-banner-art img', {
+          yPercent: 10, ease: 'none',
+          scrollTrigger: { trigger: '.class-banner', start: 'top bottom', end: 'bottom top', scrub: 0.6 },
+        });
+
+        const ctl = gsap.timeline({
+          scrollTrigger: { trigger: '.home-cta-row', start: 'top 84%', once: true },
+          defaults: { ease: 'power3.out' },
+        });
+        ctl.from('.home-cta-row > *', { y: 48, opacity: 0, duration: 0.7, stagger: 0.14 })
+          .from('.home-cta-art', { scale: 0.6, opacity: 0, rotation: -8, duration: 0.7, ease: 'back.out(1.7)' }, '-=0.35');
+      });
+      return () => mm.revert();
+    }, homeRef);
+    return () => ctx.revert();
+  }, []);
+
   const [allDiscussions, setAllDiscussions] = useState<{ id: number; topic: string; date?: string; time?: string; dates?: { date: string; time?: string }[]; level: string; description: string; spots?: number; participants?: number; duration: string; points?: string[]; status: string; thumbnail?: string; reviews?: { name: string; level?: string; text: string }[] }[]>([]);
 
   useEffect(() => {
@@ -50,6 +108,31 @@ function HomeContent() {
 
   const upcomingDiscussions = allDiscussions.filter(d => d.status === 'upcoming');
   const completedDiscussions = allDiscussions.filter(d => d.status === 'completed');
+
+  useEffect(() => {
+    if (upcomingDiscussions.length === 0) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        const dtl = gsap.timeline({
+          scrollTrigger: { trigger: '.home-disc', start: 'top 82%', once: true },
+          defaults: { ease: 'power3.out' },
+        });
+        dtl.from('.home-disc-head .section-label', { y: 16, opacity: 0, duration: 0.45 })
+          .from('.home-disc-head h2', { y: 22, opacity: 0, duration: 0.55 }, '-=0.3')
+          .from('.home-disc-all', { x: 16, opacity: 0, duration: 0.45 }, '-=0.35')
+          .from('.home-disc .disc-card', { y: 44, opacity: 0, duration: 0.65, stagger: 0.1 }, '-=0.25');
+      });
+      return () => mm.revert();
+    }, homeRef);
+    ScrollTrigger.refresh();
+    return () => ctx.revert();
+  }, [upcomingDiscussions.length]);
+
+  useEffect(() => {
+    if (view === 'select') ScrollTrigger.refresh();
+  }, [view]);
 
   function showView(target: 'select' | 'private' | 'group' | 'discussions') {
     if (target === 'select') {
@@ -192,7 +275,7 @@ function HomeContent() {
 
       <header className="top-header">
         <div className="top-header-inner">
-          <img ref={logoRef} src="/images/logo.webp" alt="Logo" onClick={handleLogoClick} style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+          <img ref={logoRef} src="/images/logo.png" alt="Logo" onClick={handleLogoClick} style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
           <span className="header-tagline">English as a Second Language</span>
           <nav className="header-nav">
             <button className={`header-nav-link ${view === 'discussions' || view === 'detail' ? 'active' : ''}`} onClick={() => showView('discussions')}>
@@ -204,15 +287,14 @@ function HomeContent() {
       </header>
 
       {/* Selection View */}
-      <div className={`!px-4 view ${view === 'select' ? 'active' : ''}`}>
+      <div className={`!px-4 view ${view === 'select' ? 'active' : ''}`} ref={homeRef}>
         <section className="hero">
           <div className="hero-inner">
             <div className="hero-copy">
-              <span className="hero-eyebrow"><span className="hero-eyebrow-dot"></span>English as a Second Language</span>
               <h1 className="hero-title">
-                Language.<br />
-                Learning.<br />
-                <span className="hero-accent">Communication.</span>
+                <span className="hero-line"><span className="hero-line-inner">Language.</span></span>
+                <span className="hero-line"><span className="hero-line-inner">Learning.</span></span>
+                <span className="hero-line"><span className="hero-line-inner hero-accent">Communication.</span></span>
               </h1>
               <p className="hero-sub">A real-life speaking progression framework — built to take you from first words to confident, fluent conversation.</p>
               <div className="hero-actions">
@@ -234,70 +316,34 @@ function HomeContent() {
           </div>
         </section>
         <div className="selection-wrap w-full">
-          <div className="selection-header" id="classes">
-            <span className="section-label">Choose your path</span>
-            <h1>Find the right class for you</h1>
-            <div className="header-divider">
-              <span className="divider-line"></span>
-              <span className="divider-dot"></span>
-              <span className="divider-line"></span>
-            </div>
-          </div>
-          <div className="selection-boxes">
-            <div className="selection-box">
-              <div className="box-top-row">
-                <div className="box-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.6" strokeLinecap="round"/><path d="M5 20v-1a7 7 0 0 1 14 0v1" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                <div className="box-intro">
-                  <h3>Personal Speaking Coaching</h3>
-                  <p className="box-subtitle">One-on-one guidance tailored to your goals and your pace.</p>
-                  <ul className="box-features">
-                    <li>Tailored to your goals</li>
-                    <li>Flexible scheduling</li>
-                    <li>Faster, focused progress</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="box-bottom-row">
-                <button className="box-cta" onClick={() => router.push('/book-lesson')}>
-                  Book a session
-                  <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </button>
-                <div className="box-illustration-bottom">
-                  <img src="/images/private-bottom.png" alt="" />
-                </div>
-              </div>
-            </div>
-            <div className="selection-box">
-              <div className="box-top-row">
-                <div className="box-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" strokeLinecap="round"/><path d="M3.5 19.5v-1a5.5 5.5 0 0 1 11 0v1" strokeLinecap="round" strokeLinejoin="round"/><circle cx="17.2" cy="8.6" r="2.5" strokeLinecap="round"/><path d="M16 13.4a4.8 4.8 0 0 1 4.5 4.8v1.3" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                <div className="box-intro">
-                  <h3>Live Group Discussions</h3>
-                  <p className="box-subtitle">Practice real conversations with other learners in a supportive group.</p>
-                  <ul className="box-features">
-                    <li>Real-world topics</li>
-                    <li>Speak with peers</li>
-                    <li>Build fluency &amp; confidence</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="box-bottom-row">
-                <button className="box-cta" onClick={() => showView('discussions')}>
+          <div className="class-banner-wrap" id="classes">
+            <section className="class-banner">
+              <div className="class-banner-copy">
+                <span className="class-banner-label">Find the right class for you</span>
+                <h2><em>Live</em> Group Discussions</h2>
+                <p>Practice real conversations with other learners in a supportive group.</p>
+                <ul className="class-banner-feats">
+                  <li>Real-world topics</li>
+                  <li>Speak with peers</li>
+                  <li>Build fluency &amp; confidence</li>
+                </ul>
+                <button className="class-banner-cta" onClick={() => showView('discussions')}>
                   View Discussions
                   <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
-                <div className="box-illustration-bottom">
-                  <img src="/images/group-bottom.png" alt="" />
-                </div>
               </div>
-            </div>
+              <div className="class-banner-art" aria-hidden="true">
+                <img src="/images/group-discussions.webp" alt="" />
+              </div>
+            </section>
           </div>
 
           {upcomingDiscussions.length > 0 && (
             <div className="home-disc">
               <div className="home-disc-head">
                 <div>
-                  <span className="section-label">Group Sessions</span>
-                  <h2>Upcoming Discussions</h2>
+                  <span className="section-label">Join a live session</span>
+                  <h2><em>Upcoming</em> Discussions</h2>
                 </div>
                 <button className="home-disc-all" onClick={() => showView('discussions')}>
                   View all
@@ -347,8 +393,8 @@ function HomeContent() {
 
           <div className="disc-cta-row home-cta-row">
             <div className="disc-cta-card">
-              <span className="disc-cta-eyebrow">Start Speaking</span>
-              <h3>Ready to speak with confidence?</h3>
+              <span className="disc-cta-eyebrow">Start speaking</span>
+              <h3>Ready to speak with <em>confidence</em>?</h3>
               <button className="disc-cta-btn" onClick={() => showView('private')}>
                 Book a free trial class
                 <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -360,10 +406,10 @@ function HomeContent() {
                   <path d="M58 150 L58 132 M126 150 L126 132" stroke="#c2cedA" strokeWidth="3" strokeLinecap="round" />
                   <circle cx="92" cy="66" r="31" fill="#e6edf2" />
                   <path d="M61 64 a31 31 0 0 1 62 0" fill="#cdd8e1" />
-                  <path d="M58 66 a34 34 0 0 1 68 0" stroke="#04D5F3" strokeWidth="6" fill="none" strokeLinecap="round" />
-                  <rect x="50" y="62" width="13" height="22" rx="6" fill="#04D5F3" />
-                  <rect x="121" y="62" width="13" height="22" rx="6" fill="#04D5F3" />
-                  <path d="M56 82 C52 104 70 110 86 106" stroke="#04D5F3" strokeWidth="5" fill="none" strokeLinecap="round" />
+                  <path d="M58 66 a34 34 0 0 1 68 0" stroke="#3B6FD4" strokeWidth="6" fill="none" strokeLinecap="round" />
+                  <rect x="50" y="62" width="13" height="22" rx="6" fill="#3B6FD4" />
+                  <rect x="121" y="62" width="13" height="22" rx="6" fill="#3B6FD4" />
+                  <path d="M56 82 C52 104 70 110 86 106" stroke="#3B6FD4" strokeWidth="5" fill="none" strokeLinecap="round" />
                   <circle cx="88" cy="105" r="5" fill="#1A2E44" />
                 </svg>
               </div>
@@ -836,7 +882,7 @@ function HomeContent() {
           <div className="footer-top">
             <div className="footer-lead">
               <span className="footer-eyebrow">ESL Here</span>
-              <h3>Speak English with real confidence.</h3>
+              <h3>Your English journey starts <em>here</em>.</h3>
               <button className="footer-cta-link" onClick={() => showView('private')}>
                 <span>Book a free trial class</span>
                 <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
