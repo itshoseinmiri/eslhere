@@ -1,5 +1,5 @@
 import { verifyToken } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { getStudentById, deleteStudent } from '@/lib/supabase/queries';
 
 export async function DELETE(
   request: Request,
@@ -10,11 +10,11 @@ export async function DELETE(
   }
   const { id } = await params;
   try {
-    const existing = await db.student.findUnique({ where: { id } });
+    const existing = await getStudentById(id);
     if (!existing) {
       return Response.json({ error: 'Student not found' }, { status: 404 });
     }
-    await db.student.delete({ where: { id } });
+    await deleteStudent(id);
     return Response.json({ success: true });
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });

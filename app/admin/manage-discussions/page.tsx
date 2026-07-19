@@ -173,6 +173,15 @@ export default function ManageDiscussionsPage() {
         .md-empty-title { font-size: 0.8125rem; font-weight: 500; color: #94a7b5; }
         .md-empty-hint { font-size: 0.75rem; color: #b8c9d6; margin-top: 4px; }
 
+        /* Skeleton loading */
+        @keyframes md-shimmer { 0% { background-position: -450px 0; } 100% { background-position: 450px 0; } }
+        .md-skel {
+          display: inline-block; border-radius: 5px; background: #eef2f5;
+          background-image: linear-gradient(90deg, #eef2f5 0px, #f6f9fb 220px, #eef2f5 440px);
+          background-size: 880px 100%; animation: md-shimmer 1.3s ease-in-out infinite;
+        }
+        .md-skel-thumb { width: 44px; height: 44px; border-radius: 8px; }
+
         /* Modal */
         .md-overlay {
           position: fixed; inset: 0; z-index: 200;
@@ -271,6 +280,43 @@ export default function ManageDiscussionsPage() {
           </button>
         ))}
       </div>
+
+      {loading && (
+        <div className="md-table-wrap">
+          <table className="md-table">
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Level</th>
+                <th>Date</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th style={{ width: 40 }} />
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i}>
+                  <td>
+                    <div className="md-topic-cell">
+                      <div className="md-skel md-skel-thumb" />
+                      <div style={{ flex: 1 }}>
+                        <div className="md-skel" style={{ height: 11, width: '55%', marginBottom: 7 }} />
+                        <div className="md-skel" style={{ height: 8, width: '80%' }} />
+                      </div>
+                    </div>
+                  </td>
+                  <td><div className="md-skel" style={{ height: 18, width: 58, borderRadius: 5 }} /></td>
+                  <td><div className="md-skel" style={{ height: 10, width: 84 }} /></td>
+                  <td><div className="md-skel" style={{ height: 10, width: 48 }} /></td>
+                  <td><div className="md-skel" style={{ height: 18, width: 74, borderRadius: 5 }} /></td>
+                  <td><div className="md-skel" style={{ height: 20, width: 20, borderRadius: 6 }} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {!loading && filtered.length === 0 ? (
         <div className="md-empty">

@@ -1,14 +1,13 @@
-import { verifyPassword, generateToken, saveAdminData } from '@/lib/auth';
+import { signInAdmin } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const { password } = await request.json();
-    if (!password || !verifyPassword(password)) {
+    const { email, password } = await request.json();
+    const session = await signInAdmin(email ?? '', password);
+    if (!session) {
       return Response.json({ error: 'Invalid password' }, { status: 401 });
     }
-    const tokenData = generateToken();
-    await saveAdminData(tokenData);
-    return Response.json(tokenData);
+    return Response.json(session);
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }

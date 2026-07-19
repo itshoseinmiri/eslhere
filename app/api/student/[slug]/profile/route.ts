@@ -1,5 +1,5 @@
 import { verifyToken } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { listStudents, getStudentRelations } from '@/lib/supabase/queries';
 import { serializeStudent, serializeClass, serializePayment, serializeDebt } from '@/lib/serialize';
 
 function slugOf(firstName: string, lastName: string) {
@@ -17,18 +17,14 @@ export async function GET(
   const decodedSlug = decodeURIComponent(slug);
 
   try {
-    const students = await db.student.findMany();
+    const students = await listStudents();
     const student = students.find((s) => slugOf(s.firstName, s.lastName) === decodedSlug);
 
     if (!student) {
       return Response.json({ error: 'Student not found' }, { status: 404 });
     }
 
-    const [classes, debts, payments] = await Promise.all([
-      db.class.findMany({ where: { studentId: student.id } }),
-      db.debt.findMany({ where: { studentId: student.id } }),
-      db.payment.findMany({ where: { studentId: student.id } }),
-    ]);
+    const { classes, payments, debts } = await getStudentRelations(student.id);
 
     const now = new Date();
     const studentClasses = classes.map(serializeClass);

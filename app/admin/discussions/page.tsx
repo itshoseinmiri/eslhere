@@ -35,7 +35,7 @@ export default function DiscussionsPage() {
     if (!token) return;
     (async () => {
       try {
-        const res = await fetch('/api/registrations', { headers: { Authorization: 'Bearer ' + token } });
+        const res = await fetch('/api/admins', { headers: { Authorization: 'Bearer ' + token } });
         if (res.status === 401) { logout(); return; }
         if (!res.ok) throw new Error();
         const all: (DiscussionEnrollment & { type?: string })[] = await res.json();
@@ -225,6 +225,15 @@ export default function DiscussionsPage() {
         .de-empty-title { font-size: 0.8125rem; font-weight: 500; color: #94a7b5; }
         .de-empty-hint { font-size: 0.75rem; color: #b8c9d6; margin-top: 4px; }
 
+        /* Skeleton loading */
+        @keyframes de-shimmer { 0% { background-position: -450px 0; } 100% { background-position: 450px 0; } }
+        .de-skel {
+          display: inline-block; border-radius: 5px; background: #eef2f5;
+          background-image: linear-gradient(90deg, #eef2f5 0px, #f6f9fb 220px, #eef2f5 440px);
+          background-size: 880px 100%; animation: de-shimmer 1.3s ease-in-out infinite;
+        }
+        .de-skel-avatar { width: 36px; height: 36px; border-radius: 9px; }
+
         /* ── Detail Modal ── */
         .de-modal-overlay {
           position: fixed; inset: 0; z-index: 200;
@@ -308,7 +317,7 @@ export default function DiscussionsPage() {
             <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
           <div>
-            <div className="de-stat-val">{enrollments.length}</div>
+            <div className="de-stat-val">{loading ? <span className="de-skel" style={{ width: 26, height: 18 }} /> : enrollments.length}</div>
             <div className="de-stat-label">Total Enrolled</div>
           </div>
         </div>
@@ -317,7 +326,7 @@ export default function DiscussionsPage() {
             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
           <div>
-            <div className="de-stat-val">{Object.keys(topicCounts).length}</div>
+            <div className="de-stat-val">{loading ? <span className="de-skel" style={{ width: 26, height: 18 }} /> : Object.keys(topicCounts).length}</div>
             <div className="de-stat-label">Active Topics</div>
           </div>
         </div>
@@ -326,7 +335,7 @@ export default function DiscussionsPage() {
             <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
           <div>
-            <div className="de-stat-val">{enrollments.filter(e => e.priorExperience === 'yes').length}</div>
+            <div className="de-stat-val">{loading ? <span className="de-skel" style={{ width: 26, height: 18 }} /> : enrollments.filter(e => e.priorExperience === 'yes').length}</div>
             <div className="de-stat-label">Returning</div>
           </div>
         </div>
@@ -341,6 +350,43 @@ export default function DiscussionsPage() {
       </div>
 
       {/* Table */}
+      {loading && (
+        <div className="de-table-wrap">
+          <table className="de-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Discussion Topic</th>
+                <th>Level</th>
+                <th>Experience</th>
+                <th>Enrolled</th>
+                <th style={{ width: 40 }} />
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i}>
+                  <td>
+                    <div className="de-name-cell">
+                      <div className="de-skel de-skel-avatar" />
+                      <div>
+                        <div className="de-skel" style={{ height: 11, width: 120, marginBottom: 6 }} />
+                        <div className="de-skel" style={{ height: 8, width: 160 }} />
+                      </div>
+                    </div>
+                  </td>
+                  <td><div className="de-skel" style={{ height: 10, width: 150 }} /></td>
+                  <td><div className="de-skel" style={{ height: 18, width: 62, borderRadius: 5 }} /></td>
+                  <td><div className="de-skel" style={{ height: 10, width: 70 }} /></td>
+                  <td><div className="de-skel" style={{ height: 10, width: 92 }} /></td>
+                  <td><div className="de-skel" style={{ height: 20, width: 20, borderRadius: 6 }} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {!loading && filtered.length === 0 ? (
         <div className="de-empty">
           {searchTerm ? (

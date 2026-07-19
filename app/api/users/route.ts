@@ -1,14 +1,13 @@
+// Lists Supabase Auth users (admin login accounts) for the Admins page.
 import { verifyToken } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { serializeRegistration } from '@/lib/serialize';
+import { listAuthUsers } from '@/lib/supabase/queries';
 
 export async function GET(request: Request) {
   if (!(await verifyToken(request))) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {
-    const registrations = await db.registration.findMany({ orderBy: { registeredAt: 'asc' } });
-    return Response.json(registrations.map(serializeRegistration));
+    return Response.json(await listAuthUsers());
   } catch {
     return Response.json({ error: 'Server error' }, { status: 500 });
   }
