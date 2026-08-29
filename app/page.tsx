@@ -131,10 +131,9 @@ function HomeContent() {
           scrollTrigger: { trigger: '.reviews', start: 'top 80%', once: true },
           defaults: { ease: 'power3.out' },
         });
-        rtl.from('.reviews-head .section-label', { y: 16, opacity: 0, duration: 0.45 })
+        rtl.from('.reviews-head .reviews-eyebrow', { y: 16, opacity: 0, duration: 0.45 })
           .from('.reviews-head h2', { y: 22, opacity: 0, duration: 0.55 }, '-=0.3')
-          .from('.rev-stage', { y: 40, opacity: 0, duration: 0.7 }, '-=0.3')
-          .from('.rev-controls', { y: 16, opacity: 0, duration: 0.45 }, '-=0.4');
+          .from('.reviews-card', { y: 40, opacity: 0, duration: 0.7 }, '-=0.25');
       });
       return () => mm.revert();
     }, homeRef);
@@ -479,45 +478,48 @@ function HomeContent() {
 
           <div className="reviews">
             <div className="reviews-head">
-              <span className="section-label reviews-label">What students say</span>
-              <h2>Loved by <em>learners</em></h2>
+              <span className="reviews-eyebrow">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5l7 7-7 7M4 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Success is only possible through learning
+              </span>
+              <h2>What our <em>students</em> say</h2>
             </div>
-            <div className="reviews-carousel">
-              <div className="rev-stage">
-                {reviewList.map((t, i) => {
-                  const rel = (i - reviewIndex + reviewList.length) % reviewList.length;
-                  const pos = rel === 0 ? 'is-active' : rel === 1 ? 'is-next' : rel === reviewList.length - 1 ? 'is-prev' : 'is-hidden';
-                  return (
-                    <article key={i} className={`rev-slide ${pos}`} aria-hidden={pos !== 'is-active'}>
-                      <span className="rev-avatar" aria-hidden="true">{t.name.charAt(0)}</span>
-                      <span className="rev-name">{t.name}</span>
-                      <span className="rev-course">{t.course}</span>
-                      {typeof t.rating === 'number' && (
-                        <span className="rev-stars" aria-label={`${t.rating} out of 5 stars`}>
-                          {[1, 2, 3, 4, 5].map(n => (
-                            <svg key={n} viewBox="0 0 24 24" className={n <= t.rating! ? 'on' : 'off'}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                          ))}
-                        </span>
-                      )}
-                      <p className="rev-text">{t.text}</p>
-                    </article>
-                  );
-                })}
-              </div>
-              <div className="rev-controls">
-                <button className="rev-nav rev-prev" aria-label="Previous review" onClick={() => setReviewIndex(i => (i - 1 + reviewList.length) % reviewList.length)}>
-                  <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </button>
-                <div className="rev-dots">
-                  {reviewList.map((_, i) => (
-                    <button key={i} className={`rev-dot ${i === reviewIndex ? 'active' : ''}`} aria-label={`Go to review ${i + 1}`} onClick={() => setReviewIndex(i)} />
-                  ))}
+
+            {(() => {
+              const t = reviewList[reviewIndex] ?? reviewList[0];
+              if (!t) return null;
+              const rating = typeof t.rating === 'number' ? t.rating : 5;
+              return (
+                <div className="reviews-card">
+                  <div className="reviews-quote">
+                    <span className="reviews-stars" aria-label={`${rating} out of 5 stars`}>
+                      {[1, 2, 3, 4, 5].map(n => (
+                        <svg key={n} viewBox="0 0 24 24" className={n <= rating ? 'on' : 'off'}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                      ))}
+                    </span>
+                    <p className="reviews-text" key={reviewIndex}>{t.text}</p>
+                    <div className="reviews-meta">
+                      <div className="reviews-author">
+                        <span className="reviews-name">{t.name}</span>
+                        <span className="reviews-role">{t.course}</span>
+                      </div>
+                      <div className="reviews-nav">
+                        <button className="reviews-nav-btn" aria-label="Previous review" onClick={() => setReviewIndex(i => (i - 1 + reviewList.length) % reviewList.length)}>
+                          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                        <button className="reviews-nav-btn" aria-label="Next review" onClick={() => setReviewIndex(i => (i + 1) % reviewList.length)}>
+                          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="reviews-portrait" aria-hidden="true">
+                    <span className="reviews-portrait-initial">{t.name.charAt(0)}</span>
+                  </div>
                 </div>
-                <button className="rev-nav rev-next" aria-label="Next review" onClick={() => setReviewIndex(i => (i + 1) % reviewList.length)}>
-                  <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </button>
-              </div>
-            </div>
+              );
+            })()}
           </div>
 
           <div className="disc-cta-row home-cta-row">
@@ -686,11 +688,14 @@ function HomeContent() {
             </div>
           </div>
 
-          <div className="disc-section">
+          <div className="disc-section disc-section-upcoming">
             <div className="disc-section-head">
               <span className="disc-section-icon disc-section-icon-up"><span className="disc-pulse"></span></span>
-              <h2>Upcoming</h2>
-              <span className="disc-section-count">{upcomingDiscussions.length} sessions</span>
+              <div className="disc-section-heading">
+                <h2>Upcoming</h2>
+                <p className="disc-section-sub">Open for registration \u2014 grab your spot</p>
+              </div>
+              <span className="disc-section-count">{upcomingDiscussions.length} {upcomingDiscussions.length === 1 ? 'session' : 'sessions'}</span>
             </div>
             {upcomingDiscussions.length === 0 ? (
               <div className="disc-empty">No upcoming discussions scheduled yet</div>
@@ -706,6 +711,7 @@ function HomeContent() {
                         {discDates[0]?.date}{discDates[0]?.time ? ` \u00b7 ${discDates[0].time}` : ''}
                       </span>
                       {discDates.length > 1 && <span className="disc-date-badge disc-date-badge-extra">+{discDates.length - 1}</span>}
+                      <span className="disc-status disc-status-open"><span className="disc-status-dot"></span>Open</span>
                     </div>
                     {d.thumbnail && <img src={d.thumbnail} alt="" className="disc-card-thumb" />}
                     <div className="disc-card-inner">
@@ -736,13 +742,16 @@ function HomeContent() {
             )}
           </div>
 
-          <div className="disc-section">
+          <div className="disc-section disc-section-completed">
             <div className="disc-section-head">
               <span className="disc-section-icon disc-section-icon-done">
                 <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </span>
-              <h2>Completed</h2>
-              <span className="disc-section-count disc-section-count-done">{completedDiscussions.length} sessions</span>
+              <div className="disc-section-heading">
+                <h2>Completed</h2>
+                <p className="disc-section-sub">Past sessions — see topics and member reviews</p>
+              </div>
+              <span className="disc-section-count disc-section-count-done">{completedDiscussions.length} {completedDiscussions.length === 1 ? 'session' : 'sessions'}</span>
             </div>
             {completedDiscussions.length === 0 ? (
               <div className="disc-empty">No completed discussions yet</div>
@@ -759,6 +768,7 @@ function HomeContent() {
                           {discDates[0]?.date || 'Completed'}
                         </span>
                         <span className="disc-level">{d.level}</span>
+                        <span className="disc-status disc-status-ended">Ended</span>
                       </div>
                       <h3 className="disc-topic">{d.topic}</h3>
                       <p className="disc-desc">{d.description}</p>
