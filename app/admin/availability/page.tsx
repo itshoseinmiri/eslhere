@@ -770,7 +770,7 @@ export default function AvailabilityPage() {
         .av-today-link {
           font-size: 0.64rem; font-weight: 500; color: var(--accent);
           background: none; border: none; cursor: pointer; padding: 0;
-          font-family: 'Poppins', sans-serif; margin-top: 2px; transition: color 0.12s;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; margin-top: 2px; transition: color 0.12s;
         }
         .av-today-link:hover { color: var(--accent-hover); text-decoration: underline; }
         .av-nav-arrow {
@@ -953,7 +953,7 @@ export default function AvailabilityPage() {
           border: 1px solid var(--border);
           background: var(--surface);
           cursor: pointer; transition: all 0.12s ease;
-          font-family: 'Poppins', sans-serif; text-align: left;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; text-align: left;
           position: relative;
         }
         .av-preset:hover:not(:disabled) {
@@ -980,7 +980,7 @@ export default function AvailabilityPage() {
           display: flex; align-items: center; gap: 7px; width: 100%;
           padding: 9px 14px; border: 1px dashed var(--border);
           border-radius: 8px; background: none; cursor: pointer;
-          font-family: 'Poppins', sans-serif; font-size: 0.78rem;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.78rem;
           font-weight: 500; color: var(--muted); transition: all 0.12s;
         }
         .av-custom-toggle:hover { border-color: var(--accent); color: var(--accent); background: rgba(45,181,192,0.03); }
@@ -997,7 +997,7 @@ export default function AvailabilityPage() {
         .av-custom-field input {
           border: 1px solid var(--border); border-radius: 7px;
           padding: 8px 10px; font-size: 0.82rem;
-          font-family: 'Poppins', sans-serif; color: var(--text);
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; color: var(--text);
           background: #fff; outline: none; width: 100%;
           transition: border-color 0.12s;
         }
@@ -1008,14 +1008,14 @@ export default function AvailabilityPage() {
         .av-custom-cancel {
           padding: 7px 14px; border: 1px solid var(--border); border-radius: 7px;
           background: #fff; color: var(--muted); font-size: 0.76rem;
-          font-weight: 500; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.12s;
+          font-weight: 500; font-family: 'Poppins', 'Vazirmatn', sans-serif; cursor: pointer; transition: all 0.12s;
         }
         .av-custom-cancel:hover { background: var(--subtle); color: var(--text); }
         .av-custom-submit {
           display: flex; align-items: center; gap: 5px;
           padding: 7px 16px; border: none; border-radius: 7px;
           background: var(--accent); color: #fff; font-size: 0.76rem;
-          font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.12s;
+          font-weight: 600; font-family: 'Poppins', 'Vazirmatn', sans-serif; cursor: pointer; transition: all 0.12s;
         }
         .av-custom-submit:hover:not(:disabled) { background: var(--accent-hover); }
         .av-custom-submit:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -1102,14 +1102,14 @@ export default function AvailabilityPage() {
         .av-modal-cancel {
           padding: 8px 20px; border: 1px solid var(--border); border-radius: 8px;
           background: #fff; color: var(--text); font-size: 0.78rem; font-weight: 500;
-          font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.12s;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; cursor: pointer; transition: all 0.12s;
         }
         .av-modal-cancel:hover { background: var(--subtle); }
         .av-modal-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
         .av-modal-remove {
           padding: 8px 20px; border: none; border-radius: 8px;
           background: #ef4444; color: #fff; font-size: 0.78rem; font-weight: 600;
-          font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.12s;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; cursor: pointer; transition: all 0.12s;
         }
         .av-modal-remove:hover { background: #dc2626; }
         .av-modal-remove:disabled { opacity: 0.6; cursor: not-allowed; }

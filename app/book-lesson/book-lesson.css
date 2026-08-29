@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap');
 
 /* ═══════════════════════════════════════════
    Book Lesson — Warm Editorial Booking
@@ -10,7 +10,7 @@
   display: flex;
   align-items: stretch;
   justify-content: center;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   background: #faf8f5;
 }
 
@@ -199,7 +199,7 @@
   color: #2f6bed;
 }
 .bk-pkg-hero-name {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.18rem;
   font-weight: 700;
   color: #16233b;
@@ -265,7 +265,7 @@
   margin-bottom: 30px;
 }
 .bk-pkg-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.7rem;
   font-weight: 700;
   color: #16233b;
@@ -302,7 +302,7 @@
   background: #fff;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   position: relative;
   box-shadow: 0 1px 2px rgba(22, 35, 59, 0.04);
   animation: bk-rise 0.5s ease both;
@@ -572,7 +572,7 @@
   box-shadow: 0 1px 2px rgba(22, 35, 59, 0.04);
 }
 .bk-side-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 0.92rem;
   font-weight: 700;
   color: #16233b;
@@ -591,7 +591,7 @@
   margin-bottom: 18px;
   cursor: pointer;
   transition: background 0.14s ease, border-color 0.14s ease;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   text-align: left;
 }
 .bk-side-pkg:hover { background: #e3ecff; border-color: #c5d6f8; }
@@ -759,7 +759,7 @@
 }
 .bk-main-heading { min-width: 0; }
 .bk-main-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.32rem;
   font-weight: 700;
   color: #16233b;
@@ -821,7 +821,7 @@
   padding: 3px 9px;
   cursor: pointer;
   transition: background 0.12s;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   margin-right: 4px;
 }
 .bk-cal-today:hover { background: #eef3ff; }
@@ -979,7 +979,7 @@
   color: #5a6478;
   cursor: pointer;
   transition: all 0.12s;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
 }
 .bk-dur-chip:hover { border-color: #b9c8ec; color: #2f6bed; }
 .bk-dur-chip.on { background: #2f6bed; border-color: #2f6bed; color: #fff; }
@@ -1030,7 +1030,7 @@
   color: #2a3550;
   cursor: pointer;
   transition: all 0.15s ease;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -1121,14 +1121,14 @@
   min-height: 38px;
 }
 .bk-reserve-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
   color: #16233b;
   letter-spacing: -0.01em;
 }
 .bk-reserve-count {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 0.74rem;
   font-weight: 700;
   color: #5a6478;
@@ -1264,7 +1264,7 @@
   border-radius: 12px;
   font-size: 0.82rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   cursor: pointer;
   transition: all 0.15s;
   width: 100%;
@@ -1351,7 +1351,7 @@
   cursor: pointer;
   padding: 0;
   margin-bottom: 18px;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   transition: color 0.12s;
 }
 .bk-back:hover { color: #2f6bed; }
@@ -1365,7 +1365,7 @@
 
 .bk-form-head { margin-bottom: 24px; }
 .bk-form-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.32rem;
   font-weight: 700;
   color: #16233b;
@@ -1404,7 +1404,7 @@
   border-radius: 11px;
   padding: 11px 14px;
   font-size: 0.84rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   color: #16233b;
   background: #fff;
   outline: none;
@@ -1470,7 +1470,7 @@
   border-radius: 12px;
   font-size: 0.86rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   cursor: pointer;
   transition: all 0.15s;
   box-shadow: 0 6px 16px rgba(47, 107, 237, 0.24);
@@ -1565,7 +1565,7 @@
 
 /* Title */
 .bk-co-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.35rem;
   font-weight: 700;
   color: #1a2e44;
@@ -1668,7 +1668,7 @@
   color: #6b7280;
 }
 .bk-co-total-amount {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.3rem;
   font-weight: 800;
   color: #1a2e44;
@@ -1717,7 +1717,7 @@
   border-radius: 12px;
   font-size: 0.92rem;
   font-weight: 700;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -1791,7 +1791,7 @@
   fill: none;
 }
 .bk-success-panel h2 {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: #1a2e44;
@@ -1943,7 +1943,7 @@
   border-radius: 10px;
   font-size: 0.82rem;
   font-weight: 500;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -2001,7 +2001,7 @@
   fill: none;
 }
 .bk-fail-panel h2 {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 1.2rem;
   font-weight: 700;
   color: #1a2e44;
@@ -2058,7 +2058,7 @@
   border-radius: 12px;
   font-size: 0.86rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 14px rgba(29, 78, 216, 0.2);
