@@ -11,10 +11,12 @@ import type {
   DiscussionDate,
   DiscussionReview,
   Registration,
+  TeacherReview,
   ClassStatus,
   BookingStatus,
   DiscussionStatus,
   RegistrationType,
+  ReviewStatus,
 } from "@/lib/types";
 
 // ── status <-> string ──
@@ -29,6 +31,9 @@ export function jsonToDiscussionStatus(s: string): DiscussionStatus {
 }
 export function jsonToRegistrationType(s: string): RegistrationType {
   return s.toUpperCase() as RegistrationType;
+}
+export function jsonToReviewStatus(s: string): ReviewStatus {
+  return s.toUpperCase() as ReviewStatus;
 }
 
 // ── Student ──
@@ -131,6 +136,19 @@ export function serializeDiscussion(d: DiscussionWithRelations) {
           })),
         }
       : {}),
+  };
+}
+
+// ── Teacher review (public testimonial) ──
+export function serializeTeacherReview(r: TeacherReview) {
+  return {
+    id: r.id,
+    name: r.name,
+    level: r.level,
+    rating: r.rating,
+    text: r.text,
+    status: r.status.toLowerCase(),
+    createdAt: r.createdAt.toISOString(),
   };
 }
 

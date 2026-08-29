@@ -7,6 +7,7 @@ export type ClassStatus = "SCHEDULED" | "COMPLETED" | "CANCELED";
 export type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELED";
 export type DiscussionStatus = "UPCOMING" | "COMPLETED";
 export type RegistrationType = "PRIVATE" | "GROUP" | "DISCUSSION";
+export type ReviewStatus = "PENDING" | "APPROVED";
 
 // ── records ──
 export interface Student {
@@ -100,6 +101,17 @@ export interface Discussion {
   points: string[];
   dates: DiscussionDate[];
   reviews: DiscussionReview[];
+}
+
+// ── teacher reviews (public-submitted testimonials, moderated) ──
+export interface TeacherReview {
+  id: string;
+  name: string;
+  level: string;
+  rating: number; // 1..5
+  text: string;
+  status: ReviewStatus;
+  createdAt: Date;
 }
 
 export interface Registration {
