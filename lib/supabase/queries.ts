@@ -14,6 +14,7 @@ import type {
   Debt,
   Discussion,
   DiscussionDate,
+  DiscussionModule,
   DiscussionReview,
   DiscussionStatus,
   Registration,
@@ -31,9 +32,10 @@ const PAYMENT_COLS =
   "id, studentId:student_id, amount, currency, note, createdAt:created_at";
 const DEBT_COLS =
   "id, studentId:student_id, amount, note, settled, createdAt:created_at";
-const DISCUSSION_COLS = `id, topic, level, description, duration, status, spots, participants, thumbnail, points,
+const DISCUSSION_COLS = `id, topic, level, description, duration, status, spots, participants, thumbnail, points, learn, requirements,
   dates:discussion_dates(id, date, time),
-  reviews:discussion_reviews(id, name, level, text)`;
+  reviews:discussion_reviews(id, name, level, text),
+  curriculum:discussion_curriculum(id, title, summary, items)`;
 const REGISTRATION_COLS =
   "id, type, firstName:first_name, lastName:last_name, email, phone, englishLevel:english_level, age, job, whyPrivate:why_private, purpose, whyGroup:why_group, topics, discussionId:discussion_id, discussionTopic:discussion_topic, priorExperience:prior_experience, goals, registeredAt:registered_at";
 
@@ -85,6 +87,12 @@ interface DiscussionReviewRow {
   level: string;
   text: string;
 }
+interface DiscussionModuleRow {
+  id: number;
+  title: string;
+  summary: string | null;
+  items: string[] | null;
+}
 interface DiscussionRow {
   id: number;
   topic: string;
@@ -96,13 +104,17 @@ interface DiscussionRow {
   participants: number | null;
   thumbnail: string | null;
   points: string[] | null;
+  learn: string[] | null;
+  requirements: string[] | null;
   dates: DiscussionDateRow[] | null;
   reviews: DiscussionReviewRow[] | null;
+  curriculum: DiscussionModuleRow[] | null;
 }
 
 export type DiscussionFull = Discussion & {
   dates: DiscussionDate[];
   reviews: DiscussionReview[];
+  curriculum: DiscussionModule[];
 };
 
 // ── row -> domain mappers ──
@@ -132,6 +144,16 @@ function toDiscussion(r: DiscussionRow): DiscussionFull {
     .slice()
     .sort((a, b) => a.id - b.id)
     .map((rv): DiscussionReview => ({ id: String(rv.id), discussionId: r.id, name: rv.name, level: rv.level, text: rv.text }));
+  const curriculum = (r.curriculum ?? [])
+    .slice()
+    .sort((a, b) => a.id - b.id)
+    .map((m): DiscussionModule => ({
+      id: String(m.id),
+      discussionId: r.id,
+      title: m.title,
+      summary: m.summary ?? "",
+      items: m.items ?? [],
+    }));
   return {
     id: r.id,
     topic: r.topic,
@@ -143,8 +165,11 @@ function toDiscussion(r: DiscussionRow): DiscussionFull {
     participants: r.participants,
     thumbnail: r.thumbnail,
     points: r.points ?? [],
+    learn: r.learn ?? [],
+    requirements: r.requirements ?? [],
     dates,
     reviews,
+    curriculum,
   };
 }
 
@@ -259,8 +284,18 @@ interface ReviewEntry {
   level: string;
   text: string;
 }
+interface ModuleEntry {
+  title: string;
+  summary: string;
+  items: string[];
+}
 
-async function insertChildren(id: number, dates: DateEntry[], reviews: ReviewEntry[]): Promise<void> {
+async function insertChildren(
+  id: number,
+  dates: DateEntry[],
+  reviews: ReviewEntry[],
+  curriculum: ModuleEntry[] = [],
+): Promise<void> {
   const admin = supabaseAdmin();
   if (dates.length) {
     const { error } = await admin
@@ -272,6 +307,12 @@ async function insertChildren(id: number, dates: DateEntry[], reviews: ReviewEnt
     const { error } = await admin
       .from("discussion_reviews")
       .insert(reviews.map((r) => ({ discussion_id: id, name: r.name, level: r.level, text: r.text })));
+    if (error) throw error;
+  }
+  if (curriculum.length) {
+    const { error } = await admin
+      .from("discussion_curriculum")
+      .insert(curriculum.map((m) => ({ discussion_id: id, title: m.title, summary: m.summary, items: m.items })));
     if (error) throw error;
   }
 }
@@ -286,8 +327,11 @@ export interface DiscussionInput {
   participants: number | null;
   thumbnail: string | null;
   points: string[];
+  learn: string[];
+  requirements: string[];
   dates: DateEntry[];
   reviews: ReviewEntry[];
+  curriculum: ModuleEntry[];
 }
 
 export async function createDiscussion(input: DiscussionInput): Promise<DiscussionFull> {
@@ -303,19 +347,21 @@ export async function createDiscussion(input: DiscussionInput): Promise<Discussi
       participants: input.participants,
       thumbnail: input.thumbnail,
       points: input.points,
+      learn: input.learn,
+      requirements: input.requirements,
     })
     .select("id")
     .single();
   if (error) throw error;
   const id = (data as { id: number }).id;
-  await insertChildren(id, input.dates, input.reviews);
+  await insertChildren(id, input.dates, input.reviews, input.curriculum);
   const created = await getDiscussion(id);
   if (!created) throw new Error("Created discussion could not be reloaded");
   return created;
 }
 
-// Partial update. `dates`/`reviews` are "replace if present" — undefined leaves
-// them untouched; an array (even empty) clears and re-inserts.
+// Partial update. `dates`/`reviews`/`curriculum` are "replace if present" —
+// undefined leaves them untouched; an array (even empty) clears and re-inserts.
 export interface DiscussionPatch {
   topic?: string;
   level?: string;
@@ -326,8 +372,11 @@ export interface DiscussionPatch {
   participants?: number | null;
   thumbnail?: string | null;
   points?: string[];
+  learn?: string[];
+  requirements?: string[];
   dates?: DateEntry[];
   reviews?: ReviewEntry[];
+  curriculum?: ModuleEntry[];
 }
 
 export async function updateDiscussion(id: number, patch: DiscussionPatch): Promise<DiscussionFull> {
@@ -343,6 +392,8 @@ export async function updateDiscussion(id: number, patch: DiscussionPatch): Prom
   if (patch.participants !== undefined) scalar.participants = patch.participants;
   if (patch.thumbnail !== undefined) scalar.thumbnail = patch.thumbnail;
   if (patch.points !== undefined) scalar.points = patch.points;
+  if (patch.learn !== undefined) scalar.learn = patch.learn;
+  if (patch.requirements !== undefined) scalar.requirements = patch.requirements;
   if (Object.keys(scalar).length) {
     const { error } = await admin.from("discussions").update(scalar).eq("id", id);
     if (error) throw error;
@@ -358,6 +409,11 @@ export async function updateDiscussion(id: number, patch: DiscussionPatch): Prom
     if (del.error) throw del.error;
     await insertChildren(id, [], patch.reviews);
   }
+  if (patch.curriculum !== undefined) {
+    const del = await admin.from("discussion_curriculum").delete().eq("discussion_id", id);
+    if (del.error) throw del.error;
+    await insertChildren(id, [], [], patch.curriculum);
+  }
 
   const updated = await getDiscussion(id);
   if (!updated) throw new Error("Updated discussion could not be reloaded");
@@ -365,7 +421,7 @@ export async function updateDiscussion(id: number, patch: DiscussionPatch): Prom
 }
 
 export async function deleteDiscussion(id: number): Promise<void> {
-  // FK cascade removes dates/reviews.
+  // FK cascade removes dates/reviews/curriculum.
   const { error } = await supabaseAdmin().from("discussions").delete().eq("id", id);
   if (error) throw error;
 }

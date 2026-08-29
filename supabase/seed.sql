@@ -37,9 +37,21 @@ insert into debts (id, student_id, amount, note, settled, created_at) values
   ('debt_1', 'stu_mina', 800000, 'First package balance', false, now() - interval '8 days');
 
 -- ── discussions (ids are identity-generated; children linked by topic) ──
-insert into discussions (topic, level, description, duration, status, spots, participants, points) values
-  ('Travel & Culture', 'Intermediate',       'Share travel stories and learn vocabulary for getting around abroad.', '60 min', 'UPCOMING',  4,    null, array['Airport & hotel phrases', 'Describing places', 'Cultural do''s and don''ts']),
-  ('Job Interviews',   'Upper-Intermediate', 'Practice answering common interview questions with confidence.',        '90 min', 'COMPLETED', null, 6,    array[]::text[]);
+insert into discussions (topic, level, description, duration, status, spots, participants, points, learn, requirements) values
+  ('Travel & Culture', 'Intermediate',       'Share travel stories and learn vocabulary for getting around abroad.', '60 min', 'UPCOMING',  4,    null, array['Airport & hotel phrases', 'Describing places', 'Cultural do''s and don''ts'],
+    array['Ask for and follow directions without freezing up', 'Handle check-in, boarding and hotel problems in English', 'Describe a place so other people can picture it', 'Talk about customs and habits without sounding rude'],
+    array['An A2–B1 level of English (you can hold a short conversation)', 'A quiet room, headphones and a stable internet connection', 'A willingness to speak — mistakes are part of the session']),
+  ('Job Interviews',   'Upper-Intermediate', 'Practice answering common interview questions with confidence.',        '90 min', 'COMPLETED', null, 6,    array[]::text[], array[]::text[], array[]::text[]);
+
+insert into discussion_curriculum (discussion_id, title, summary, items) values
+  ((select id from discussions where topic = 'Travel & Culture'), 'Warm-up: where have you been?', 'A low-pressure opener so everyone speaks in the first five minutes.',
+    array['Introduce yourself and one trip you remember', 'Past simple vs present perfect for travel stories', 'Quick vocabulary round: places and transport']),
+  ((select id from discussions where topic = 'Travel & Culture'), 'At the airport and the hotel', 'The phrases you actually need when something goes wrong.',
+    array['Check-in, security and boarding', 'Asking for a different room, a late checkout, a refund', 'Roleplay: your booking is missing']),
+  ((select id from discussions where topic = 'Travel & Culture'), 'Describing a place', 'Move from "it was nice" to something a listener can picture.',
+    array['Adjective order and intensifiers', 'Comparing two cities you know', 'Two-minute solo turn with feedback']),
+  ((select id from discussions where topic = 'Travel & Culture'), 'Culture, customs and small talk', 'Closing round on the things guidebooks leave out.',
+    array['Tipping, greetings and personal space', 'Polite ways to say no', 'Group debate: the best and worst travel advice']);
 
 insert into discussion_dates (discussion_id, date, time) values
   ((select id from discussions where topic = 'Travel & Culture'), 'May 28', '20:00'),

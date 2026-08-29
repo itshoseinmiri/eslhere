@@ -181,11 +181,24 @@ function seed(): Store {
       participants: null,
       thumbnail: null,
       points: ["Airport & hotel phrases", "Describing places", "Cultural do's and don'ts"],
+      learn: [
+        "Ask for and follow directions without freezing up",
+        "Handle check-in, boarding and hotel problems in English",
+        "Describe a place so other people can picture it",
+      ],
+      requirements: [
+        "An A2-B1 level of English (you can hold a short conversation)",
+        "A quiet room, headphones and a stable internet connection",
+      ],
       dates: [
         { id: "dd_1", discussionId: 1, date: "May 28", time: "20:00" },
         { id: "dd_2", discussionId: 1, date: "Jun 4", time: "20:00" },
       ],
       reviews: [],
+      curriculum: [
+        { id: "dc_1", discussionId: 1, title: "Warm-up: where have you been?", summary: "A low-pressure opener so everyone speaks in the first five minutes.", items: ["Introduce yourself and one trip you remember", "Past simple vs present perfect for travel stories"] },
+        { id: "dc_2", discussionId: 1, title: "At the airport and the hotel", summary: "The phrases you actually need when something goes wrong.", items: ["Check-in, security and boarding", "Roleplay: your booking is missing"] },
+      ],
     },
     {
       id: 2,
@@ -198,6 +211,9 @@ function seed(): Store {
       participants: 6,
       thumbnail: null,
       points: [],
+      learn: [],
+      requirements: [],
+      curriculum: [],
       dates: [{ id: "dd_3", discussionId: 2, date: "May 14", time: "19:00" }],
       reviews: [
         { id: "dr_1", discussionId: 2, name: "Sara", level: "Intermediate", text: "Really helpful — I felt much more prepared." },
@@ -227,7 +243,7 @@ const discussionModel = {
   findUnique: async (args: Args) =>
     store.discussions.find((d) => matches(d as unknown as Record<string, unknown>, args.where)) ?? null,
   create: async (args: Args) => {
-    const { dates, reviews, ...scalar } = args.data;
+    const { dates, reviews, curriculum, ...scalar } = args.data;
     const id = ++discussionSeq;
     const row: Discussion = {
       id,
@@ -236,9 +252,12 @@ const discussionModel = {
       participants: null,
       thumbnail: null,
       points: [],
+      learn: [],
+      requirements: [],
       ...scalar,
       dates: (dates?.create ?? []).map((d: { date: string; time: string }) => ({ id: cuid(), discussionId: id, ...d })),
       reviews: (reviews?.create ?? []).map((r: { name: string; level: string; text: string }) => ({ id: cuid(), discussionId: id, ...r })),
+      curriculum: (curriculum?.create ?? []).map((m: { title: string; summary: string; items: string[] }) => ({ id: cuid(), discussionId: id, ...m })),
     };
     store.discussions.push(row);
     return row;
@@ -246,10 +265,11 @@ const discussionModel = {
   update: async (args: Args) => {
     const row = store.discussions.find((d) => matches(d as unknown as Record<string, unknown>, args.where));
     if (!row) throw new Error("Record not found");
-    const { dates, reviews, ...scalar } = args.data;
+    const { dates, reviews, curriculum, ...scalar } = args.data;
     Object.assign(row, scalar);
     if (dates) row.dates = (dates.create ?? []).map((d: { date: string; time: string }) => ({ id: cuid(), discussionId: row.id, ...d }));
     if (reviews) row.reviews = (reviews.create ?? []).map((r: { name: string; level: string; text: string }) => ({ id: cuid(), discussionId: row.id, ...r }));
+    if (curriculum) row.curriculum = (curriculum.create ?? []).map((m: { title: string; summary: string; items: string[] }) => ({ id: cuid(), discussionId: row.id, ...m }));
     return row;
   },
   delete: async (args: Args) => {

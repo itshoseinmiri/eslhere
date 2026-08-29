@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { CSSProperties, TouchEvent as ReactTouchEvent, TransitionEvent as ReactTransitionEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import gsap from 'gsap';
@@ -22,10 +22,61 @@ const JOURNEY_STEPS: JourneyStep[] = [
   { n: '05', title: 'Feedback & Progress', desc: 'Regular reviews and honest feedback keep your journey on track.', cta: 'See student results', action: 'reviews' },
 ];
 
+// shape returned by /api/discussions — optional keys are omitted by the
+// serializer when the discussion has nothing stored for them
+type ApiDiscussion = {
+  id: number;
+  topic: string;
+  date?: string;
+  time?: string;
+  dates?: { date: string; time?: string }[];
+  level: string;
+  description: string;
+  spots?: number;
+  participants?: number;
+  duration: string;
+  points?: string[];
+  learn?: string[];
+  requirements?: string[];
+  curriculum?: { title: string; summary?: string; items?: string[] }[];
+  status: string;
+  thumbnail?: string;
+  reviews?: { name: string; level?: string; text: string }[];
+};
+
 // reviews shown side by side in the testimonials row
 const REVIEWS_PER_VIEW = 3;
+// discussion-detail review slider — cards visible at once on a wide screen
+const DETAIL_REVIEWS_PER_VIEW = 3;
+
+// The slider needs the visible-card count in JS (to clamp the last page), and CSS
+// needs it too — so both read the same two breakpoints. See .dt-revs-track.
+const DETAIL_REV_WIDE = '(min-width: 901px)';
+const DETAIL_REV_MID = '(min-width: 641px)';
+
+function subscribeDetailPerView(onChange: () => void) {
+  const queries = [window.matchMedia(DETAIL_REV_WIDE), window.matchMedia(DETAIL_REV_MID)];
+  queries.forEach(q => q.addEventListener('change', onChange));
+  return () => queries.forEach(q => q.removeEventListener('change', onChange));
+}
+
+function getDetailPerView() {
+  if (window.matchMedia(DETAIL_REV_WIDE).matches) return DETAIL_REVIEWS_PER_VIEW;
+  return window.matchMedia(DETAIL_REV_MID).matches ? 2 : 1;
+}
+
+// discussion detail: the instructor block shown above the reviews
+const TEACHER_ROLES = [
+  'Learning & Development (L&D) Specialist',
+  'Certified English Instructor',
+  'Learning Architect',
+  'Speaking Specialist',
+  'Linguistics & AI Enthusiast',
+];
+const TEACHER_SKILLS = ['Learning Management', 'Teaching Learning', 'Adult Education', 'Critical Thinking'];
 
 type Testimonial = { name: string; course: string; text: string };
+type Review = Testimonial & { rating?: number };
 const TESTIMONIALS: Testimonial[] = [
   { name: 'Sara', course: 'IELTS Prep', text: 'I went from freezing up mid-sentence to leading a meeting in English. The one-on-one feedback caught habits I never knew I had.' },
   { name: 'Nima', course: 'Group Discussions', text: 'The weekly discussions made speaking feel normal instead of scary. I stopped translating in my head and just started talking.' },
@@ -34,6 +85,16 @@ const TESTIMONIALS: Testimonial[] = [
   { name: 'Leila', course: 'Group Discussions', text: 'I finally look forward to speaking English. The group is supportive and the topics actually matter to me.' },
   { name: 'Kian', course: 'Private Classes', text: 'My tutor built every lesson around my job. Each class paid off the next morning at work.' },
 ];
+
+function ReviewStars({ rating }: { rating: number }) {
+  return (
+    <span className="reviews-stars" aria-label={`${rating} out of 5 stars`}>
+      {[1, 2, 3, 4, 5].map(s => (
+        <svg key={s} viewBox="0 0 24 24" className={s <= rating ? 'on' : 'off'}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+      ))}
+    </span>
+  );
+}
 
 export default function Home() {
   return (
@@ -54,7 +115,15 @@ function HomeContent() {
   const [enrollSuccess, setEnrollSuccess] = useState(false);
   const [reviewIndex, setReviewIndex] = useState(0);
   const [reviewAnimate, setReviewAnimate] = useState(true);
-  const [reviewList, setReviewList] = useState<{ name: string; course: string; text: string; rating?: number }[]>(TESTIMONIALS);
+  const [reviewList, setReviewList] = useState<Review[]>(TESTIMONIALS);
+  // the review whose full text is open in the modal
+  const [openReview, setOpenReview] = useState<Review | null>(null);
+  // discussion detail: which curriculum accordion tab is expanded (-1 == all closed)
+  const [openModule, setOpenModule] = useState(0);
+  // discussion detail: review slider position and how many cards fit the viewport
+  const [detailRev, setDetailRev] = useState(0);
+  // server renders the widest layout; the client corrects it on hydration
+  const detailPerView = useSyncExternalStore(subscribeDetailPerView, getDetailPerView, () => DETAIL_REVIEWS_PER_VIEW);
   const logoRef = useRef<HTMLImageElement>(null);
   const logoClicksRef = useRef(0);
   const logoTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -63,7 +132,10 @@ function HomeContent() {
   const reviewIndexRef = useRef(0);
   const reviewListRef = useRef(reviewList);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const detailTouchRef = useRef<{ x: number; y: number } | null>(null);
   const homeRef = useRef<HTMLDivElement>(null);
+  const reviewsRef = useRef<HTMLDivElement>(null);
+  const openReviewRef = useRef(false);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -151,7 +223,7 @@ function HomeContent() {
     return () => ctx.revert();
   }, []);
 
-  const [allDiscussions, setAllDiscussions] = useState<{ id: number; topic: string; date?: string; time?: string; dates?: { date: string; time?: string }[]; level: string; description: string; spots?: number; participants?: number; duration: string; points?: string[]; status: string; thumbnail?: string; reviews?: { name: string; level?: string; text: string }[] }[]>([]);
+  const [allDiscussions, setAllDiscussions] = useState<ApiDiscussion[]>([]);
 
   useEffect(() => {
     fetch('/api/discussions')
@@ -178,7 +250,7 @@ function HomeContent() {
 
   // slides the strip by exactly one card; the appended clones make the wrap seamless
   const advanceReview = (dir: 1 | -1, manual = false) => {
-    if (isTransitioningRef.current) return;
+    if (isTransitioningRef.current || openReviewRef.current) return;
     const n = reviewListRef.current.length;
     // nothing to slide when every review already fits in the row
     if (n <= REVIEWS_PER_VIEW) return;
@@ -248,6 +320,40 @@ function HomeContent() {
   // keep list ref in sync with state (API updates don't restart autoplay interval)
   useEffect(() => { reviewListRef.current = reviewList; }, [reviewList]);
 
+  // mark the cards whose text overflows three lines so only those get a "Show full" button.
+  // toggled on the DOM directly: the card's className is static, so React never overwrites it,
+  // and the featured card changes width mid-slide (observed, so the flag follows).
+  useEffect(() => {
+    const root = reviewsRef.current;
+    if (!root) return;
+    const sync = () => {
+      root.querySelectorAll<HTMLElement>('.reviews-card').forEach(card => {
+        const text = card.querySelector<HTMLElement>('.reviews-text');
+        if (text) card.classList.toggle('is-clamped', text.scrollHeight - text.clientHeight > 1);
+      });
+    };
+    sync();
+    // the clamped box keeps a fixed height, so a late webfont swap wouldn't trip the observer
+    document.fonts?.ready.then(sync).catch(() => {});
+    const ro = new ResizeObserver(sync);
+    root.querySelectorAll('.reviews-text').forEach(el => ro.observe(el));
+    return () => ro.disconnect();
+  }, [reviewList]);
+
+  // modal: close on Escape and hold the page still behind it
+  useEffect(() => {
+    openReviewRef.current = openReview !== null;
+    if (!openReview) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenReview(null); };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [openReview]);
+
   const upcomingDiscussions = allDiscussions.filter(d => d.status === 'upcoming');
   const completedDiscussions = allDiscussions.filter(d => d.status === 'completed');
 
@@ -305,6 +411,8 @@ function HomeContent() {
   function openDetail(id: number) {
     setSelectedDisc(id);
     setEnrollSuccess(false);
+    setOpenModule(0);
+    setDetailRev(0);
     setView('detail');
     window.history.pushState(null, '', `/discussions/${id}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -417,6 +525,33 @@ function HomeContent() {
 
   const activeDisc = allDiscussions.find(d => d.id === selectedDisc);
   const isCompletedDetail = activeDisc?.status === 'completed';
+  const detailReviews = activeDisc?.reviews ?? [];
+  // the strip stops once the last card is flush right, so the final page is never half empty
+  const detailRevMax = Math.max(0, detailReviews.length - detailPerView);
+  // clamped on read, not stored: a narrower viewport or a shorter review list
+  // shrinks detailRevMax, which would otherwise strand the strip past its last page
+  const detailRevAt = Math.min(detailRev, detailRevMax);
+
+  function slideDetailRev(dir: 1 | -1) {
+    setDetailRev(Math.min(detailRevMax, Math.max(0, detailRevAt + dir)));
+  }
+
+  const onDetailRevTouchStart = (e: ReactTouchEvent<HTMLDivElement>) => {
+    const t = e.touches[0];
+    detailTouchRef.current = t ? { x: t.clientX, y: t.clientY } : null;
+  };
+
+  const onDetailRevTouchEnd = (e: ReactTouchEvent<HTMLDivElement>) => {
+    const start = detailTouchRef.current;
+    const t = e.changedTouches[0];
+    detailTouchRef.current = null;
+    if (!start || !t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    // horizontal flicks only — vertical drags stay page scrolls
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+    slideDetailRev(dx < 0 ? 1 : -1);
+  };
 
   return (
     <>
@@ -562,7 +697,7 @@ function HomeContent() {
             </div>
           )}
 
-          <div className="reviews">
+          <div className="reviews" ref={reviewsRef}>
             <div className="reviews-head">
               <span className="reviews-eyebrow">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5l7 7-7 7M4 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -604,12 +739,16 @@ function HomeContent() {
                           >
                             <div className="reviews-card">
                               <div className="reviews-quote">
-                                <span className="reviews-stars" aria-label={`${rating} out of 5 stars`}>
-                                  {[1, 2, 3, 4, 5].map(s => (
-                                    <svg key={s} viewBox="0 0 24 24" className={s <= rating ? 'on' : 'off'}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                                  ))}
-                                </span>
+                                <ReviewStars rating={rating} />
                                 <p className="reviews-text">{t.text}</p>
+                                <button
+                                  type="button"
+                                  className="reviews-more"
+                                  onClick={() => setOpenReview({ ...t, rating })}
+                                >
+                                  Show full
+                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                </button>
                                 <div className="reviews-meta">
                                   <div className="reviews-author">
                                     <div className="reviews-portrait" aria-hidden="true">
@@ -969,7 +1108,10 @@ function HomeContent() {
           const detailDates = activeDisc.dates && activeDisc.dates.length > 0
             ? activeDisc.dates
             : (activeDisc.date ? [{ date: activeDisc.date, time: activeDisc.time }] : []);
-          const reviews = activeDisc.reviews || [];
+          const learn = activeDisc.learn || [];
+          const requirements = activeDisc.requirements || [];
+          const curriculum = activeDisc.curriculum || [];
+          const lessonCount = curriculum.reduce((n, m) => n + (m.items?.length || 0), 0);
           return (
           <div className="dt-wrap">
             <button className="back-btn" onClick={() => { setView('discussions'); setEnrollSuccess(false); window.history.pushState(null, '', '/discussions'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
@@ -1007,7 +1149,6 @@ function HomeContent() {
                         </span>
                       </div>
                       <span className="dt-level-badge">{activeDisc.level}</span>
-                      <p className="dt-desc">{activeDisc.description}</p>
                     </>
                   ) : (
                     <>
@@ -1016,7 +1157,6 @@ function HomeContent() {
                         <span>Upcoming Session</span>
                       </div>
                       <h1 className="dt-title">{activeDisc.topic}</h1>
-                      <p className="dt-subtitle">{activeDisc.description}</p>
                       <div className="dt-meta-row">
                         {detailDates.map((dd, i) => (
                           <span key={i} className="dt-meta-tag">
@@ -1046,40 +1186,7 @@ function HomeContent() {
                   )}
                 </div>
               </div>
-              {isCompletedDetail ? (
-                <div className="dt-reviews-panel">
-                  <div className="dt-reviews-head">
-                    <span className="dt-reviews-eyebrow">Teacher&apos;s Feedback</span>
-                    <h2>How the students did</h2>
-                  </div>
-                  {reviews.length > 0 ? (
-                    <>
-                      <span className="dt-rev-count">{reviews.length} student {reviews.length === 1 ? 'review' : 'reviews'}</span>
-                      <div className="dt-rev-list">
-                        {reviews.map((r, i) => (
-                          <article key={i} className="dt-rev-card" style={{ animationDelay: `${0.12 + i * 0.07}s` }}>
-                            <span className="dt-rev-avatar">{(r.name || '?').trim().charAt(0).toUpperCase()}</span>
-                            <div className="dt-rev-body">
-                              <div className="dt-rev-head-row">
-                                <div className="dt-rev-id">
-                                  <span className="dt-rev-name">{r.name}</span>
-                                  {r.level && <span className="dt-rev-level">{r.level}</span>}
-                                </div>
-                              </div>
-                              <p className="dt-rev-text">{r.text}</p>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="dt-rev-empty">
-                      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      <p>The teacher hasn&apos;t shared feedback for this session yet.</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
+              {!isCompletedDetail && (
               <div className="dt-form-panel">
                 {enrollSuccess ? (
                   <div className="success-message">
@@ -1134,6 +1241,218 @@ function HomeContent() {
               </div>
               )}
             </div>
+
+            {(learn.length > 0 || curriculum.length > 0 || requirements.length > 0 || activeDisc.description) && (
+              <div className="dt-sections">
+                {learn.length > 0 && (
+                  <section className="dt-section">
+                    <div className="dt-section-head">
+                      <span className="dt-section-eyebrow">Outcomes</span>
+                      <h2>What you&apos;ll learn?</h2>
+                    </div>
+                    <ul className="dt-learn-list">
+                      {learn.map((l, i) => (
+                        <li key={i}>
+                          <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <span>{l}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
+                {curriculum.length > 0 && (
+                  <section className="dt-section">
+                    <div className="dt-section-head">
+                      <span className="dt-section-eyebrow">Curriculum</span>
+                      <h2>Course curriculum</h2>
+                      <p className="dt-section-note">
+                        {curriculum.length} {curriculum.length === 1 ? 'module' : 'modules'}
+                        {lessonCount > 0 && ` \u00b7 ${lessonCount} ${lessonCount === 1 ? 'lesson' : 'lessons'}`}
+                        {` \u00b7 ${activeDisc.duration}`}
+                      </p>
+                    </div>
+                    <div className="dt-acc">
+                      {curriculum.map((m, i) => {
+                        const items = m.items || [];
+                        const isOpen = openModule === i;
+                        const panelId = `dt-acc-${activeDisc.id}-${i}`;
+                        return (
+                          <div key={i} className={`dt-acc-tab${isOpen ? ' is-open' : ''}`}>
+                            <button
+                              type="button"
+                              className="dt-acc-head"
+                              aria-expanded={isOpen}
+                              aria-controls={panelId}
+                              onClick={() => setOpenModule(isOpen ? -1 : i)}
+                            >
+                              <span className="dt-acc-num">{String(i + 1).padStart(2, '0')}</span>
+                              <span className="dt-acc-titles">
+                                <span className="dt-acc-title">{m.title}</span>
+                                {m.summary && <span className="dt-acc-sum">{m.summary}</span>}
+                              </span>
+                              {items.length > 0 && (
+                                <span className="dt-acc-count">{items.length} {items.length === 1 ? 'lesson' : 'lessons'}</span>
+                              )}
+                              <span className="dt-acc-chev" aria-hidden="true">
+                                <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              </span>
+                            </button>
+                            <div className="dt-acc-panel" id={panelId} role="region">
+                              <div className="dt-acc-panel-inner">
+                                {items.length > 0 ? (
+                                  <ul className="dt-acc-items">
+                                    {items.map((it, k) => (
+                                      <li key={k}>
+                                        <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                                        <span>{it}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="dt-acc-blank">Details for this module are coming soon.</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+
+                {requirements.length > 0 && (
+                  <section className="dt-section">
+                    <div className="dt-section-head">
+                      <span className="dt-section-eyebrow">Before you join</span>
+                      <h2>Requirements</h2>
+                    </div>
+                    <ul className="dt-req-list">
+                      {requirements.map((r, i) => (
+                        <li key={i}><span>{r}</span></li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
+                {activeDisc.description && (
+                  <section className="dt-section">
+                    <div className="dt-section-head">
+                      <span className="dt-section-eyebrow">Description</span>
+                      <h2>About this discussion</h2>
+                    </div>
+                    <div className="dt-about">
+                      {activeDisc.description.split(/\n+/).filter(Boolean).map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
+            )}
+
+            <section className="dt-teacher">
+              <div className="dt-section-head">
+                <span className="dt-section-eyebrow">Your instructor</span>
+                <h2>Meet your teacher</h2>
+              </div>
+              <div className="dt-teacher-body">
+                <aside className="dt-teacher-side">
+                  <div className="dt-teacher-avatar" aria-hidden="true">MF</div>
+                  <h3 className="dt-teacher-name">Mahdieh Fahimpour</h3>
+                  <ul className="dt-teacher-roles">
+                    {TEACHER_ROLES.map((role) => (
+                      <li key={role}>{role}</li>
+                    ))}
+                  </ul>
+                </aside>
+                <div className="dt-teacher-main">
+                  <p className="dt-teacher-bio">
+                    As an experienced and dedicated online English teacher and tutor, I am committed to helping
+                    students of all levels and ages achieve their language goals. With over 6 years of experience,
+                    I have a proven track record of delivering engaging and effective lessons tailored to each
+                    student&rsquo;s unique learning objectives. My fluency in three languages and ongoing pursuit of a
+                    fourth has given me a deep appreciation for the challenges of language learning. I take pride in
+                    my professionalism and dedication to delivering high-quality language instruction, and I am
+                    confident that my excellent communication skills and ability to leverage online tools and
+                    resources can create a positive and supportive learning environment that empowers my students
+                    succeed.
+                  </p>
+                  <div className="dt-teacher-skills">
+                    <h4>Top skills</h4>
+                    <div className="dt-teacher-chips">
+                      {TEACHER_SKILLS.map((skill) => (
+                        <span key={skill} className="dt-teacher-chip">{skill}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {(isCompletedDetail || detailReviews.length > 0) && (
+              <section className="dt-revs">
+                <div className="dt-revs-head">
+                  <div className="dt-section-head">
+                    <span className="dt-section-eyebrow">{isCompletedDetail ? "Teacher\u2019s feedback" : 'Student reviews'}</span>
+                    <h2>{isCompletedDetail ? 'How the students did' : 'What members said'}</h2>
+                  </div>
+                  {detailReviews.length > detailPerView && (
+                    <div className="dt-revs-nav">
+                      <button type="button" aria-label="Previous review" disabled={detailRevAt === 0} onClick={() => slideDetailRev(-1)}>
+                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </button>
+                      <button type="button" aria-label="Next review" disabled={detailRevAt >= detailRevMax} onClick={() => slideDetailRev(1)}>
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {detailReviews.length > 0 ? (
+                  <>
+                    <div className="dt-revs-viewport" onTouchStart={onDetailRevTouchStart} onTouchEnd={onDetailRevTouchEnd}>
+                      <div
+                        className="dt-revs-track"
+                        data-per-view={detailPerView}
+                        style={{ '--drev-i': String(detailRevAt) } as CSSProperties}
+                      >
+                        {detailReviews.map((r, i) => (
+                          <article key={i} className="dt-revs-card">
+                            <span className="dt-revs-mark" aria-hidden="true">&ldquo;</span>
+                            <p className="dt-revs-text">{r.text}</p>
+                            <div className="dt-revs-foot">
+                              <span className="dt-revs-avatar">{(r.name || '?').trim().charAt(0).toUpperCase()}</span>
+                              <span className="dt-revs-id">
+                                <span className="dt-revs-name">{r.name}</span>
+                                {r.level && <span className="dt-revs-level">{r.level}</span>}
+                              </span>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                    {detailRevMax > 0 && (
+                      <div className="dt-revs-dots">
+                        {Array.from({ length: detailRevMax + 1 }, (_, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            className={i === detailRevAt ? 'is-on' : ''}
+                            aria-label={`Go to review ${i + 1}`}
+                            onClick={() => setDetailRev(i)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="dt-rev-empty">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <p>The teacher hasn&apos;t shared feedback for this session yet.</p>
+                  </div>
+                )}
+              </section>
+            )}
           </div>
           );
         })()}
@@ -1182,6 +1501,35 @@ function HomeContent() {
             <span className="footer-copy">&copy; 2024 ESL Here</span>
           </div>
         </footer>
+      )}
+
+      {openReview && (
+        <div
+          className="review-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Review by ${openReview.name}`}
+          onClick={() => setOpenReview(null)}
+        >
+          <div className="review-modal" onClick={e => e.stopPropagation()}>
+            <button type="button" className="review-modal-close" aria-label="Close review" onClick={() => setOpenReview(null)}>
+              <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/></svg>
+            </button>
+            <ReviewStars rating={typeof openReview.rating === 'number' ? openReview.rating : 5} />
+            <p className="review-modal-text">{openReview.text}</p>
+            <div className="reviews-meta">
+              <div className="reviews-author">
+                <div className="reviews-portrait" aria-hidden="true">
+                  <span className="reviews-portrait-initial">{openReview.name.charAt(0)}</span>
+                </div>
+                <div className="reviews-author-text">
+                  <span className="reviews-name">{openReview.name}</span>
+                  <span className="reviews-role">{openReview.course}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className={`error-toast ${error ? 'show' : ''}`} style={{ visibility: error ? 'visible' : 'hidden' }}>Something went wrong. Please try again.</div>
