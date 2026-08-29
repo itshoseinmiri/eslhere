@@ -102,7 +102,9 @@ create table discussions (
   spots        integer,
   participants integer,
   thumbnail    text,
-  points       text[] not null default '{}'
+  points       text[] not null default '{}',
+  learn        text[] not null default '{}',   -- "What you'll learn?" bullets
+  requirements text[] not null default '{}'    -- "Requirements" bullets
 );
 
 -- id is bigint identity so ordering by id == insertion order (dates/reviews are
@@ -123,6 +125,16 @@ create table discussion_reviews (
   text          text not null
 );
 create index on discussion_reviews (discussion_id);
+
+-- One row per "Course curriculum" accordion tab on the discussion detail page.
+create table discussion_curriculum (
+  id            bigint generated always as identity primary key,
+  discussion_id bigint not null references discussions(id) on delete cascade,
+  title         text not null,
+  summary       text not null default '',
+  items         text[] not null default '{}'
+);
+create index on discussion_curriculum (discussion_id);
 
 -- ── registrations (private / group / discussion sign-ups) ──
 create table registrations (
@@ -177,6 +189,7 @@ alter table availability       enable row level security;
 alter table discussions        enable row level security;
 alter table discussion_dates   enable row level security;
 alter table discussion_reviews enable row level security;
+alter table discussion_curriculum enable row level security;
 alter table registrations      enable row level security;
 alter table teacher_reviews    enable row level security;
 alter table admin_session      enable row level security;

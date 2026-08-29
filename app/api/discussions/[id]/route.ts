@@ -17,6 +17,27 @@ interface ReviewEntry {
   level?: string;
   text: string;
 }
+interface ModuleEntry {
+  title: string;
+  summary?: string;
+  items?: string[];
+}
+
+// Trims a bullet list and drops the blank rows the admin form leaves behind.
+function cleanList(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((v) => String(v).trim()).filter(Boolean) : [];
+}
+
+// A module is only kept when it has a title — an empty accordion tab is noise.
+function cleanModules(value: unknown): { title: string; summary: string; items: string[] }[] {
+  return (Array.isArray(value) ? (value as ModuleEntry[]) : [])
+    .map((m) => ({
+      title: String(m?.title ?? '').trim(),
+      summary: String(m?.summary ?? '').trim(),
+      items: cleanList(m?.items),
+    }))
+    .filter((m) => m.title);
+}
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await verifyToken(request))) {
@@ -54,7 +75,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (body.participants !== undefined) patch.participants = body.participants != null ? Number(body.participants) : null;
     if (body.thumbnail !== undefined) patch.thumbnail = body.thumbnail || null;
     if (body.status !== undefined) patch.status = jsonToDiscussionStatus(body.status);
-    if (body.points !== undefined) patch.points = Array.isArray(body.points) ? body.points : [];
+    if (body.points !== undefined) patch.points = cleanList(body.points);
+    if (body.learn !== undefined) patch.learn = cleanList(body.learn);
+    if (body.requirements !== undefined) patch.requirements = cleanList(body.requirements);
+    if (body.curriculum !== undefined) patch.curriculum = cleanModules(body.curriculum);
 
     if (body.dates !== undefined || body.date !== undefined) {
       const entries: DateEntry[] =

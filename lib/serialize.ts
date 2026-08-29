@@ -9,6 +9,7 @@ import type {
   Debt,
   Discussion,
   DiscussionDate,
+  DiscussionModule,
   DiscussionReview,
   Registration,
   TeacherReview,
@@ -105,10 +106,11 @@ export function serializeDebt(d: Debt) {
   };
 }
 
-// ── Discussion (+ nested dates / reviews) ──
+// ── Discussion (+ nested dates / reviews / curriculum) ──
 type DiscussionWithRelations = Discussion & {
   dates: DiscussionDate[];
   reviews: DiscussionReview[];
+  curriculum: DiscussionModule[];
 };
 
 export function serializeDiscussion(d: DiscussionWithRelations) {
@@ -123,6 +125,17 @@ export function serializeDiscussion(d: DiscussionWithRelations) {
     ...(d.participants != null ? { participants: d.participants } : {}),
     ...(d.thumbnail ? { thumbnail: d.thumbnail } : {}),
     ...(d.points.length ? { points: d.points } : {}),
+    ...(d.learn.length ? { learn: d.learn } : {}),
+    ...(d.requirements.length ? { requirements: d.requirements } : {}),
+    ...(d.curriculum.length
+      ? {
+          curriculum: d.curriculum.map((m) => ({
+            title: m.title,
+            ...(m.summary ? { summary: m.summary } : {}),
+            ...(m.items.length ? { items: m.items } : {}),
+          })),
+        }
+      : {}),
     dates: d.dates.map((x) => ({
       date: x.date,
       ...(x.time ? { time: x.time } : {}),

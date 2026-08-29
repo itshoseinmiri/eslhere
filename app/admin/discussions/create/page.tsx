@@ -4,6 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAdmin } from '../../admin-context';
+import JalaliDatePicker from '../../../components/jalali-date-picker';
+import {
+  BulletListEditor,
+  CurriculumEditor,
+  cleanBullets,
+  cleanModules,
+  type CurriculumModule,
+} from '../../../components/discussion-syllabus-fields';
 
 const LEVEL_OPTIONS = ['A1\u2013A2', 'A2\u2013B1', 'B1\u2013B2', 'B2\u2013C1', 'C1\u2013C2'];
 
@@ -53,6 +61,9 @@ export default function CreateDiscussionPage() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [participants, setParticipants] = useState(0);
   const [points, setPoints] = useState(['', '', '']);
+  const [learn, setLearn] = useState(['', '', '']);
+  const [requirements, setRequirements] = useState(['']);
+  const [modules, setModules] = useState<CurriculumModule[]>([]);
   const [reviews, setReviews] = useState<{ name: string; level: string; text: string }[]>([]);
   const [thumbnail, setThumbnail] = useState('');
   const [thumbDragOver, setThumbDragOver] = useState(false);
@@ -163,6 +174,10 @@ export default function CreateDiscussionPage() {
           ...(r.level ? { level: r.level } : {}),
         }));
 
+      const cleanedLearn = cleanBullets(learn);
+      const cleanedRequirements = cleanBullets(requirements);
+      const cleanedModules = cleanModules(modules);
+
       const payload: Record<string, unknown> = {
         topic: topic.trim(),
         description: description.trim(),
@@ -170,6 +185,9 @@ export default function CreateDiscussionPage() {
         dates: dateEntries,
         duration,
         ...(thumbnail ? { thumbnail } : {}),
+        ...(cleanedLearn.length > 0 ? { learn: cleanedLearn } : {}),
+        ...(cleanedRequirements.length > 0 ? { requirements: cleanedRequirements } : {}),
+        ...(cleanedModules.length > 0 ? { curriculum: cleanedModules } : {}),
         ...(isCompleted
           ? { status: 'completed', participants, ...(cleanedReviews.length > 0 ? { reviews: cleanedReviews } : {}) }
           : { spots, points: filteredPoints.length > 0 ? filteredPoints : undefined }),
@@ -625,11 +643,11 @@ export default function CreateDiscussionPage() {
                       <div key={i} className="cd-date-entry">
                         <div className="cd-date-entry-num">{i + 1}</div>
                         <div className="cd-date-entry-fields">
-                          <input
-                            type="date"
-                            className={`cd-input${errors.dates ? ' has-error' : ''}`}
+                          <JalaliDatePicker
                             value={d.date}
-                            onChange={e => updateDateEntry(i, 'date', e.target.value)}
+                            onChange={v => updateDateEntry(i, 'date', v)}
+                            hasError={!!errors.dates}
+                            ariaLabel={`Date ${i + 1}`}
                           />
                           {!isCompleted && (
                             <input
@@ -682,9 +700,9 @@ export default function CreateDiscussionPage() {
                 )}
               </div>
 
-              {/* Discussion Points (upcoming only) */}
+              {/* What we discuss? (upcoming only) */}
               {!isCompleted && <div className="cd-card">
-                <div className="cd-card-title">Discussion Points <span className="cd-label-opt">(optional)</span></div>
+                <div className="cd-card-title">What we discuss? <span className="cd-label-opt">(optional)</span></div>
                 {points.map((p, i) => (
                   <div key={i} className="cd-point-row">
                     <input
@@ -707,6 +725,27 @@ export default function CreateDiscussionPage() {
                   </button>
                 )}
               </div>}
+
+              {/* Syllabus — rendered as sections on the public discussion page */}
+              <BulletListEditor
+                title="What you'll learn?"
+                hint="(optional)"
+                addLabel="Add outcome"
+                placeholder="Outcome"
+                values={learn}
+                onChange={setLearn}
+              />
+
+              <CurriculumEditor modules={modules} onChange={setModules} />
+
+              <BulletListEditor
+                title="Requirements"
+                hint="(optional)"
+                addLabel="Add requirement"
+                placeholder="Requirement"
+                values={requirements}
+                onChange={setRequirements}
+              />
 
               {/* Student Reviews (completed only) */}
               {isCompleted && <div className="cd-card">
@@ -824,7 +863,7 @@ export default function CreateDiscussionPage() {
 
                 {points.some(p => p.trim()) && (
                   <div className="cd-preview-points">
-                    <div className="cd-preview-points-title">Discussion Points</div>
+                    <div className="cd-preview-points-title">What we discuss?</div>
                     {points.filter(p => p.trim()).map((p, i) => (
                       <div key={i} className="cd-preview-point">{p}</div>
                     ))}

@@ -11,6 +11,27 @@ interface ReviewEntry {
   level?: string;
   text: string;
 }
+interface ModuleEntry {
+  title: string;
+  summary?: string;
+  items?: string[];
+}
+
+// Trims a bullet list and drops the blank rows the admin form leaves behind.
+function cleanList(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((v) => String(v).trim()).filter(Boolean) : [];
+}
+
+// A module is only kept when it has a title — an empty accordion tab is noise.
+function cleanModules(value: unknown): { title: string; summary: string; items: string[] }[] {
+  return (Array.isArray(value) ? (value as ModuleEntry[]) : [])
+    .map((m) => ({
+      title: String(m?.title ?? '').trim(),
+      summary: String(m?.summary ?? '').trim(),
+      items: cleanList(m?.items),
+    }))
+    .filter((m) => m.title);
+}
 
 export async function GET() {
   try {
@@ -28,7 +49,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { topic, date, time, dates, level, description, spots, duration, points, status, participants, thumbnail, reviews } = body;
+    const { topic, date, time, dates, level, description, spots, duration, points, status, participants, thumbnail, reviews, learn, requirements, curriculum } = body;
 
     if (!topic || (!date && (!dates || dates.length === 0)) || !level || !description || !duration) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
@@ -46,7 +67,10 @@ export async function POST(request: Request) {
       spots: spots != null ? Number(spots) : null,
       participants: participants != null ? Number(participants) : null,
       thumbnail: thumbnail || null,
-      points: Array.isArray(points) ? points : [],
+      points: cleanList(points),
+      learn: cleanList(learn),
+      requirements: cleanList(requirements),
+      curriculum: cleanModules(curriculum),
       dates: dateEntries.map((d) => ({ date: d.date, time: d.time ?? '' })),
       reviews: (Array.isArray(reviews) ? reviews : []).map((r: ReviewEntry) => ({
         name: r.name,

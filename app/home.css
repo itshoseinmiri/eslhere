@@ -331,7 +331,6 @@ body::before {
 .dt-meta-tag svg { width: 14px; height: 14px; stroke: #5f7a8f; stroke-width: 1.5; fill: none; }
 .dt-spots-tag { color: #2f6aa0; font-weight: 500; }
 .dt-level-badge { display: inline-block; padding: 4px 14px; background: #edf3f9; color: #4a667f; font-size: 0.72rem; font-weight: 500; border-radius: 8px; letter-spacing: 0.5px; margin-bottom: 20px; }
-.dt-desc { font-size: 0.84rem; color: var(--text-light); font-weight: 300; line-height: 1.7; margin-bottom: 28px; }
 .dt-points { }
 .dt-points h3 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
 .dt-points ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
@@ -371,7 +370,6 @@ body::before {
 .dt-form-panel .field textarea:focus { border-color: #1E8FD0; box-shadow: 0 0 0 3px rgba(30,143,208,0.16); }
 
 /* Subtitle directly under the title */
-.dt-subtitle { font-size: 0.95rem; color: var(--text-light); font-weight: 300; line-height: 1.6; margin: -4px 0 22px; }
 
 /* Plain inline meta — icon + text, no chips */
 .dt-info:not(.dt-info-completed) .dt-meta-row { gap: 22px; margin-bottom: 18px; }
@@ -411,6 +409,135 @@ body::before {
 .dt-rev-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 30px 20px 42px; color: var(--text-light); }
 .dt-rev-empty svg { width: 40px; height: 40px; stroke: #bfeef7; stroke-width: 1.5; fill: none; }
 .dt-rev-empty p { font-size: 0.84rem; font-weight: 300; line-height: 1.6; max-width: 260px; }
+
+/* ── Discussion detail: full-width sections under the hero ── */
+.dt-sections { display: flex; flex-direction: column; gap: 20px; margin-top: 24px; }
+.dt-section { background: #fff; border: 1px solid #edf2f7; border-radius: 22px; padding: 30px 32px; animation: fadeUp 0.55s ease-out both; }
+.dt-section-head { margin-bottom: 20px; }
+.dt-section-eyebrow { display: block; font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #1E9DE3; margin-bottom: 8px; }
+.dt-section-head h2 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.35rem; font-weight: 600; color: var(--text); letter-spacing: -0.4px; line-height: 1.3; }
+.dt-section-note { margin-top: 8px; font-size: 0.78rem; font-weight: 400; color: var(--text-light); }
+
+/* "What you'll learn?" — two columns of ticked bullets */
+.dt-learn-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 32px; }
+.dt-learn-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 0.88rem; line-height: 1.55; color: var(--text); font-weight: 400; }
+.dt-learn-list svg { width: 18px; height: 18px; min-width: 18px; margin-top: 2px; stroke: #1E9DE3; stroke-width: 2.6; fill: none; }
+
+/* Requirements — a plain dotted list, deliberately quieter than the outcomes */
+.dt-req-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.dt-req-list li { position: relative; padding-left: 20px; font-size: 0.88rem; line-height: 1.6; color: var(--text-light); font-weight: 400; }
+.dt-req-list li::before { content: ''; position: absolute; left: 0; top: 9px; width: 7px; height: 7px; border-radius: 50%; background: #c3d4e0; }
+
+/* Description */
+.dt-about p { font-size: 0.9rem; line-height: 1.8; color: var(--text-light); font-weight: 300; }
+.dt-about p + p { margin-top: 14px; }
+
+/* ── Course curriculum accordion — each module is its own separated tab ── */
+.dt-acc { display: flex; flex-direction: column; gap: 12px; }
+.dt-acc-tab { border: 1px solid #e6edf4; border-radius: 16px; background: #fbfcfd; overflow: hidden; transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; }
+.dt-acc-tab:hover { border-color: #cfe4f4; }
+.dt-acc-tab.is-open { background: #fff; border-color: #bfe0f6; box-shadow: 0 4px 18px rgba(30,157,227,0.08); }
+.dt-acc-head { display: flex; align-items: center; gap: 14px; width: 100%; padding: 18px 20px; background: none; border: none; text-align: left; cursor: pointer; font-family: inherit; }
+.dt-acc-num { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #eaf4fc; color: #1E9DE3; font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.3px; transition: background 0.25s ease, color 0.25s ease; }
+.dt-acc-tab.is-open .dt-acc-num { background: #1E9DE3; color: #fff; }
+.dt-acc-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.dt-acc-title { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.94rem; font-weight: 500; color: var(--text); line-height: 1.35; }
+.dt-acc-sum { font-size: 0.78rem; font-weight: 300; color: var(--text-light); line-height: 1.5; }
+.dt-acc-count { flex-shrink: 0; font-size: 0.72rem; font-weight: 500; color: var(--text-light); white-space: nowrap; }
+.dt-acc-chev { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 1px solid #e2ebf2; transition: transform 0.3s ease, border-color 0.25s ease; }
+.dt-acc-chev svg { width: 13px; height: 13px; stroke: #5f7a8f; stroke-width: 2.2; fill: none; }
+.dt-acc-tab.is-open .dt-acc-chev { transform: rotate(180deg); border-color: #bfe0f6; }
+
+/* 0fr -> 1fr animates the panel open without measuring its height in JS */
+.dt-acc-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.32s cubic-bezier(0.22, 0.61, 0.36, 1); }
+.dt-acc-tab.is-open .dt-acc-panel { grid-template-rows: 1fr; }
+.dt-acc-panel-inner { overflow: hidden; min-height: 0; }
+.dt-acc-items { list-style: none; margin: 0; padding: 0 20px 18px 68px; display: flex; flex-direction: column; gap: 11px; }
+.dt-acc-items li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.86rem; line-height: 1.55; color: var(--text-light); font-weight: 400; }
+.dt-acc-items svg { width: 11px; height: 11px; min-width: 11px; margin-top: 5px; fill: #9fc9e6; stroke: none; }
+.dt-acc-blank { padding: 0 20px 18px 68px; font-size: 0.84rem; font-weight: 300; color: var(--text-light); }
+
+/* ── Discussion detail: instructor card above the reviews ── */
+.dt-teacher { margin-top: 20px; background: #fff; border: 1px solid #edf2f7; border-radius: 22px; padding: 30px 32px; animation: fadeUp 0.55s ease-out both; }
+.dt-teacher-body { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 32px; align-items: start; }
+.dt-teacher-side { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 24px 20px; background: #f8fbfd; border: 1px solid #eaf2f8; border-radius: 18px; }
+.dt-teacher-avatar { display: inline-flex; align-items: center; justify-content: center; width: 84px; height: 84px; border-radius: 26px; background: #eaf4fc; border: 1px solid #cfe4f4; font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.7rem; font-weight: 600; letter-spacing: 0.5px; color: #1E9DE3; }
+.dt-teacher-name { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.08rem; font-weight: 600; color: var(--text); letter-spacing: -0.2px; line-height: 1.3; }
+.dt-teacher-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.dt-teacher-roles li { font-size: 0.76rem; font-weight: 400; line-height: 1.45; color: var(--text-light); }
+.dt-teacher-roles li + li { padding-top: 7px; border-top: 1px solid #e6eef5; }
+.dt-teacher-bio { font-size: 0.9rem; line-height: 1.8; color: var(--text-light); font-weight: 300; margin: 0; }
+.dt-teacher-skills { margin-top: 22px; padding-top: 20px; border-top: 1px solid #eef2f6; }
+.dt-teacher-skills h4 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 13px; }
+.dt-teacher-chips { display: flex; flex-wrap: wrap; gap: 9px; }
+.dt-teacher-chip { display: inline-block; padding: 7px 15px; background: #eaf4fc; border: 1px solid #d8eaf8; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: #2f6aa0; }
+
+/* ── Discussion detail: review slider at the foot of the page ── */
+.dt-revs { margin-top: 20px; background: #fff; border: 1px solid #e6f9fc; border-radius: 22px; padding: 30px 32px; animation: fadeUp 0.55s ease-out both; }
+.dt-revs-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.dt-revs .dt-section-eyebrow { color: #0399b3; }
+.dt-revs-nav { display: flex; gap: 8px; flex-shrink: 0; }
+.dt-revs-nav button { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 1px solid #d8eef4; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease; }
+.dt-revs-nav button svg { width: 16px; height: 16px; stroke: #0399b3; stroke-width: 2.2; fill: none; }
+.dt-revs-nav button:hover:not(:disabled) { background: #e0fafe; border-color: #bfeef7; }
+.dt-revs-nav button:disabled { opacity: 0.35; cursor: default; }
+
+/* the strip slides exactly one card per step, so a page never lands mid-card */
+.dt-revs-viewport { overflow: hidden; margin: 0 -6px; padding: 4px 6px; }
+.dt-revs-track {
+  --drev-gap: 18px;
+  --drev-per-view: 3;
+  --drev-card: calc((100% - (var(--drev-per-view) - 1) * var(--drev-gap)) / var(--drev-per-view));
+  --drev-i: 0;
+  display: flex;
+  align-items: stretch;
+  gap: var(--drev-gap);
+  transform: translate3d(calc(var(--drev-i) * (var(--drev-card) + var(--drev-gap)) * -1), 0, 0);
+  transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+.dt-revs-track[data-per-view="1"] { --drev-per-view: 1; }
+.dt-revs-track[data-per-view="2"] { --drev-per-view: 2; }
+.dt-revs-card { position: relative; flex: 0 0 var(--drev-card); max-width: var(--drev-card); min-width: 0; display: flex; flex-direction: column; box-sizing: border-box; background: #fbfeff; border: 1px solid #e6f4f8; border-radius: 18px; padding: 24px 24px 20px; }
+.dt-revs-mark { position: absolute; top: 6px; right: 18px; font-family: 'Poppins', serif; font-size: 3.4rem; line-height: 1; color: #e4f7fb; pointer-events: none; user-select: none; }
+.dt-revs-text { position: relative; flex: 1; font-size: 0.87rem; line-height: 1.72; color: var(--text-light); font-weight: 300; margin: 0 0 18px; }
+.dt-revs-foot { display: flex; align-items: center; gap: 11px; padding-top: 16px; border-top: 1px solid #eef8fa; }
+.dt-revs-avatar { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 12px; background: #e0fafe; border: 1px solid #bfeef7; font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.95rem; font-weight: 600; color: #0399b3; }
+.dt-revs-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dt-revs-name { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+.dt-revs-level { font-size: 0.7rem; font-weight: 500; color: #0399b3; }
+.dt-revs-dots { display: flex; justify-content: center; gap: 7px; margin-top: 20px; }
+.dt-revs-dots button { width: 7px; height: 7px; padding: 0; border: none; border-radius: 50%; background: #cfe6ec; cursor: pointer; transition: width 0.25s ease, background 0.25s ease; }
+.dt-revs-dots button.is-on { width: 20px; border-radius: 4px; background: #04D5F3; }
+
+/* a completed session has no enroll form beside the hero */
+.dt-layout-completed { grid-template-columns: 1fr; }
+
+@media (max-width: 900px) {
+  .dt-learn-list { grid-template-columns: 1fr; }
+  .dt-teacher-body { grid-template-columns: 1fr; gap: 24px; }
+  .dt-teacher-side { flex-direction: row; align-items: center; text-align: left; flex-wrap: wrap; gap: 8px 18px; }
+  .dt-teacher-side .dt-teacher-name { width: calc(100% - 102px); }
+  .dt-teacher-roles { width: 100%; flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .dt-teacher-roles li + li { padding-top: 0; border-top: none; }
+  .dt-teacher-roles li { padding: 5px 12px; background: #fff; border: 1px solid #e6eef5; border-radius: 20px; }
+}
+@media (max-width: 560px) {
+  .dt-section, .dt-revs, .dt-teacher { padding: 24px 20px; border-radius: 18px; }
+  .dt-teacher-side { padding: 18px 16px; }
+  .dt-teacher-avatar { width: 64px; height: 64px; border-radius: 20px; font-size: 1.3rem; }
+  .dt-teacher-side .dt-teacher-name { width: calc(100% - 82px); }
+  .dt-section-head h2 { font-size: 1.15rem; }
+  .dt-acc-head { padding: 15px 14px; gap: 11px; }
+  .dt-acc-num { width: 30px; height: 30px; border-radius: 9px; font-size: 0.72rem; }
+  .dt-acc-count { display: none; }
+  .dt-acc-items, .dt-acc-blank { padding: 0 14px 16px 55px; }
+  .dt-revs-head { flex-direction: column; }
+  .dt-revs-nav { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dt-acc-panel, .dt-revs-track, .dt-acc-chev { transition: none; }
+}
 
 @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -492,7 +619,42 @@ body::before {
 .reviews-stars svg { width: 16px; height: 16px; }
 .reviews-stars svg.on polygon { fill: #f5b301; }
 .reviews-stars svg.off polygon { fill: rgba(26,46,68,0.12); }
-.reviews-text { font-size: 0.98rem; line-height: 1.55; color: #2a4657; font-weight: 400; margin: 0 0 18px; }
+/* cards stay level: the text is cut at three lines with an ellipsis, the rest lives in the modal */
+.reviews-text {
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: #2a4657;
+  font-weight: 400;
+  margin: 0 0 14px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+/* only shown on cards whose text actually overflows (class set from page.tsx) */
+.reviews-more { display: none; }
+.reviews-card.is-clamped .reviews-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin: 0 0 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #0399b3;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.reviews-card.is-clamped .reviews-more:hover { color: #026b7d; }
+.reviews-card.is-clamped .reviews-more:hover svg { transform: translateX(3px); }
+.reviews-more svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.2; fill: none; transition: transform 0.2s ease; }
+.reviews-more:focus-visible { outline: 3px solid #a6ecf7; outline-offset: 3px; border-radius: 4px; }
 
 .reviews-meta { display: flex; align-items: center; gap: 20px; margin-top: auto; padding-top: 16px; border-top: 1px solid #f0f3f6; }
 .reviews-author { display: flex; align-items: center; gap: 12px; min-width: 0; }
@@ -531,6 +693,53 @@ body::before {
 }
 @media (prefers-reduced-motion: reduce) {
   .reviews-track.is-sliding, .reviews-card-wrap, .reviews-card { transition: none; }
+}
+
+/* ── full review modal ── */
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 32, 47, 0.55);
+  backdrop-filter: blur(3px);
+  animation: revModalFade 0.22s ease-out;
+}
+.review-modal {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 82vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #edf1f5;
+  border-radius: 22px;
+  padding: 34px 36px 28px;
+  box-shadow: 0 24px 60px rgba(26, 46, 68, 0.24);
+  animation: revModalIn 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.review-modal-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 1px solid #e2e8ee; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+.review-modal-close:hover { background: var(--accent-soft); border-color: #bfeef7; }
+.review-modal-close svg { width: 16px; height: 16px; stroke: #5f7a8f; stroke-width: 2.2; fill: none; }
+.review-modal-close:focus-visible { outline: 3px solid #a6ecf7; outline-offset: 2px; }
+.review-modal .reviews-stars { margin-bottom: 14px; }
+.review-modal-text { font-size: 1rem; line-height: 1.7; color: #2a4657; font-weight: 400; margin: 0 0 22px; white-space: pre-wrap; }
+.review-modal .reviews-meta { margin-top: 0; }
+
+@keyframes revModalFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes revModalIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 560px) {
+  .review-modal { padding: 30px 22px 24px; max-height: 86vh; }
+  .review-modal-text { font-size: 0.95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .review-modal-overlay, .review-modal { animation: none; }
+  .reviews-more svg { transition: none; }
 }
 
 /* ── Learning Journey ── */

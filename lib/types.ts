@@ -88,6 +88,15 @@ export interface DiscussionReview {
   text: string;
 }
 
+// One accordion tab in the "Course curriculum" section of the detail page.
+export interface DiscussionModule {
+  id: string;
+  discussionId: number;
+  title: string;
+  summary: string;
+  items: string[];
+}
+
 export interface Discussion {
   id: number;
   topic: string;
@@ -99,8 +108,11 @@ export interface Discussion {
   participants: number | null;
   thumbnail: string | null;
   points: string[];
+  learn: string[]; // "What you'll learn?" bullets
+  requirements: string[]; // "Requirements" bullets
   dates: DiscussionDate[];
   reviews: DiscussionReview[];
+  curriculum: DiscussionModule[];
 }
 
 // ── teacher reviews (public-submitted testimonials, moderated) ──
@@ -153,6 +165,9 @@ export interface DiscussionUpdateInput {
   thumbnail?: string | null;
   status?: DiscussionStatus;
   points?: string[];
+  learn?: string[];
+  requirements?: string[];
   dates?: { deleteMany?: object; create: { date: string; time: string }[] };
   reviews?: { deleteMany?: object; create: { name: string; level: string; text: string }[] };
+  curriculum?: { deleteMany?: object; create: { title: string; summary: string; items: string[] }[] };
 }
