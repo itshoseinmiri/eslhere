@@ -56,6 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isSessionsPage = pathname === '/admin/sessions' || pathname.startsWith('/admin/sessions/');
   const isDiscussionsPage = pathname === '/admin/discussions' || pathname.startsWith('/admin/discussions/');
   const isManageDiscPage = pathname === '/admin/manage-discussions' || pathname.startsWith('/admin/manage-discussions/');
+  const isReviewsPage = pathname === '/admin/reviews' || pathname.startsWith('/admin/reviews/');
   const isAvailabilityPage = pathname === '/admin/availability';
 
   return (
@@ -82,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <div className="sidebar-section-label">Main</div>
             <ul className="sidebar-nav">
-              <li><Link className={!isStudentsPage && !isStudentDetail && !isSessionsPage && !isDiscussionsPage && !isManageDiscPage && !isAvailabilityPage ? 'active' : ''} href="/admin">
+              <li><Link className={!isStudentsPage && !isStudentDetail && !isSessionsPage && !isDiscussionsPage && !isManageDiscPage && !isReviewsPage && !isAvailabilityPage ? 'active' : ''} href="/admin">
                 <span className="nav-icon">
                   <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </span>
@@ -103,6 +104,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/><line x1="9" y1="10" x2="15" y2="10" strokeLinecap="round"/><line x1="9" y1="14" x2="13" y2="14" strokeLinecap="round"/></svg>
                 </span>
                 <span className="nav-label">Manage Discussions</span>
+              </Link></li>
+              <li><Link className={isReviewsPage ? 'active' : ''} href="/admin/reviews">
+                <span className="nav-icon">
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+                <span className="nav-label">Student Reviews</span>
               </Link></li>
             </ul>
 

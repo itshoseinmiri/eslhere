@@ -18,6 +18,8 @@ import type {
   DiscussionStatus,
   Registration,
   RegistrationType,
+  TeacherReview,
+  ReviewStatus,
 } from "@/lib/types";
 
 // ── aliased column lists ──
@@ -463,4 +465,81 @@ export async function createRegistration(input: RegistrationInput): Promise<void
     goals: input.goals,
   });
   if (error) throw error;
+}
+
+// ═══ teacher reviews (public testimonials) ═══
+const TEACHER_REVIEW_COLS =
+  "id, name, level, rating, text, status, createdAt:created_at";
+
+interface TeacherReviewRow {
+  id: string;
+  name: string;
+  level: string;
+  rating: number;
+  text: string;
+  status: string;
+  createdAt: string;
+}
+
+function toTeacherReview(r: TeacherReviewRow): TeacherReview {
+  return {
+    ...r,
+    status: r.status.toUpperCase() as ReviewStatus,
+    createdAt: new Date(r.createdAt),
+  };
+}
+
+export interface TeacherReviewInput {
+  name: string;
+  level: string;
+  rating: number;
+  text: string;
+}
+
+export async function createTeacherReview(input: TeacherReviewInput): Promise<void> {
+  const { error } = await supabaseAdmin().from("teacher_reviews").insert({
+    name: input.name,
+    level: input.level,
+    rating: input.rating,
+    text: input.text,
+    // status defaults to 'PENDING' — awaits admin approval.
+  });
+  if (error) throw error;
+}
+
+// All reviews, newest first. Optionally filter by status. Admin use.
+export async function listTeacherReviews(status?: ReviewStatus): Promise<TeacherReview[]> {
+  let query = supabaseAdmin()
+    .from("teacher_reviews")
+    .select(TEACHER_REVIEW_COLS)
+    .order("created_at", { ascending: false });
+  if (status) query = query.eq("status", status);
+  const { data, error } = await query;
+  if (error) throw error;
+  return ((data ?? []) as unknown as TeacherReviewRow[]).map(toTeacherReview);
+}
+
+// Approved reviews only, newest first. Public (homepage) use.
+export async function listApprovedReviews(): Promise<TeacherReview[]> {
+  return listTeacherReviews("APPROVED");
+}
+
+export async function setReviewStatus(id: string, status: ReviewStatus): Promise<boolean> {
+  const { data, error } = await supabaseAdmin()
+    .from("teacher_reviews")
+    .update({ status })
+    .eq("id", id)
+    .select("id");
+  if (error) throw error;
+  return (data ?? []).length > 0;
+}
+
+export async function deleteTeacherReview(id: string): Promise<boolean> {
+  const { data, error } = await supabaseAdmin()
+    .from("teacher_reviews")
+    .delete()
+    .eq("id", id)
+    .select("id");
+  if (error) throw error;
+  return (data ?? []).length > 0;
 }

@@ -18,6 +18,7 @@ create type class_status       as enum ('SCHEDULED', 'COMPLETED', 'CANCELED');
 create type booking_status     as enum ('PENDING', 'CONFIRMED', 'CANCELED');
 create type discussion_status  as enum ('UPCOMING', 'COMPLETED');
 create type registration_type  as enum ('PRIVATE', 'GROUP', 'DISCUSSION');
+create type review_status       as enum ('PENDING', 'APPROVED');
 
 -- ── students ──
 create table students (
@@ -145,6 +146,20 @@ create table registrations (
   registered_at     timestamptz not null default now()
 );
 
+-- ── teacher reviews (public-submitted testimonials; moderated before display) ──
+-- Students submit via /leave-review (status PENDING). Admin approves in
+-- /admin/reviews; the public homepage shows only APPROVED rows.
+create table teacher_reviews (
+  id         text primary key default gen_random_uuid()::text,
+  name       text not null,
+  level      text not null,             -- e.g. 'B1–B2'
+  rating     integer not null,          -- 1..5
+  text       text not null,
+  status     review_status not null default 'PENDING',
+  created_at timestamptz not null default now()
+);
+create index on teacher_reviews (status);
+
 -- ── admin session (single-row custom admin token; see lib/auth.ts) ──
 create table admin_session (
   id           text primary key,          -- always 'admin'
@@ -163,6 +178,7 @@ alter table discussions        enable row level security;
 alter table discussion_dates   enable row level security;
 alter table discussion_reviews enable row level security;
 alter table registrations      enable row level security;
+alter table teacher_reviews    enable row level security;
 alter table admin_session      enable row level security;
 
 -- Example policies to uncomment when a public page needs read access:
@@ -170,6 +186,8 @@ alter table admin_session      enable row level security;
 -- create policy "public read dates"        on discussion_dates   for select using (true);
 -- create policy "public read reviews"      on discussion_reviews for select using (true);
 -- create policy "public read availability" on availability       for select using (true);
--- Public booking/registration submit (anon insert):
--- create policy "anon submit booking"      on bookings      for insert with check (true);
--- create policy "anon submit registration" on registrations for insert with check (true);
+-- create policy "public read reviews"      on teacher_reviews    for select using (status = 'APPROVED');
+-- Public booking/registration/review submit (anon insert):
+-- create policy "anon submit booking"      on bookings        for insert with check (true);
+-- create policy "anon submit registration" on registrations   for insert with check (true);
+-- create policy "anon submit review"       on teacher_reviews for insert with check (true);

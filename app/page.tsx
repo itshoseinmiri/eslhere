@@ -6,6 +6,31 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './home.css';
 
+type JourneyStep = {
+  n: string;
+  title: string;
+  desc: string;
+  cta: string;
+  action: 'private' | 'group' | 'discussions' | 'classes' | 'reviews';
+};
+const JOURNEY_STEPS: JourneyStep[] = [
+  { n: '01', title: 'Introductory Session', desc: 'We get to know you — your goals, your needs, and what you want from English.', cta: 'Book your intro', action: 'private' },
+  { n: '02', title: 'Level Assessment', desc: 'A relaxed check of where you stand today, spotting your strengths and gaps.', cta: 'Assess my level', action: 'private' },
+  { n: '03', title: 'Choose the Right Class', desc: 'We match you to the class, plan, and style that fit you best.', cta: 'Browse classes', action: 'classes' },
+  { n: '04', title: 'Start Learning', desc: 'Begin your personalized path with the right class and a clear plan.', cta: 'Enroll now', action: 'private' },
+  { n: '05', title: 'Feedback & Progress', desc: 'Regular reviews and honest feedback keep your journey on track.', cta: 'See student results', action: 'reviews' },
+];
+
+type Testimonial = { name: string; course: string; text: string };
+const TESTIMONIALS: Testimonial[] = [
+  { name: 'Sara', course: 'IELTS Prep', text: 'I went from freezing up mid-sentence to leading a meeting in English. The one-on-one feedback caught habits I never knew I had.' },
+  { name: 'Nima', course: 'Group Discussions', text: 'The weekly discussions made speaking feel normal instead of scary. I stopped translating in my head and just started talking.' },
+  { name: 'Roya', course: 'Private Classes', text: 'Six months in and my speaking jumped two levels. Real topics, honest corrections, and zero wasted time.' },
+  { name: 'Amir', course: 'IELTS Prep', text: 'Hit Overall 7.5 on my first attempt. The mock sessions were tougher than the real exam — exactly what I needed.' },
+  { name: 'Leila', course: 'Group Discussions', text: 'I finally look forward to speaking English. The group is supportive and the topics actually matter to me.' },
+  { name: 'Kian', course: 'Private Classes', text: 'My tutor built every lesson around my job. Each class paid off the next morning at work.' },
+];
+
 export default function Home() {
   return (
     <Suspense>
@@ -23,6 +48,8 @@ function HomeContent() {
   const [error, setError] = useState(false);
   const [selectedDisc, setSelectedDisc] = useState<number | null>(null);
   const [enrollSuccess, setEnrollSuccess] = useState(false);
+  const [reviewIndex, setReviewIndex] = useState(0);
+  const [reviewList, setReviewList] = useState<{ name: string; course: string; text: string; rating?: number }[]>(TESTIMONIALS);
   const logoRef = useRef<HTMLImageElement>(null);
   const logoClicksRef = useRef(0);
   const logoTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -85,12 +112,29 @@ function HomeContent() {
           scrollTrigger: { trigger: '.class-banner', start: 'top bottom', end: 'bottom top', scrub: 0.6 },
         });
 
+        const jtl = gsap.timeline({
+          scrollTrigger: { trigger: '.journey', start: 'top 82%', once: true },
+          defaults: { ease: 'power3.out' },
+        });
+        jtl.from('.journey-head > *', { y: 20, opacity: 0, duration: 0.5, stagger: 0.1 })
+          .from('.journey-line', { scaleX: 0, transformOrigin: 'left center', duration: 0.7, ease: 'power2.inOut' }, '-=0.2')
+          .from('.journey-step', { y: 30, opacity: 0, duration: 0.55, stagger: 0.12 }, '-=0.5');
+
         const ctl = gsap.timeline({
           scrollTrigger: { trigger: '.home-cta-row', start: 'top 84%', once: true },
           defaults: { ease: 'power3.out' },
         });
         ctl.from('.home-cta-row > *', { y: 48, opacity: 0, duration: 0.7, stagger: 0.14 })
           .from('.home-cta-art', { scale: 0.6, opacity: 0, rotation: -8, duration: 0.7, ease: 'back.out(1.7)' }, '-=0.35');
+
+        const rtl = gsap.timeline({
+          scrollTrigger: { trigger: '.reviews', start: 'top 80%', once: true },
+          defaults: { ease: 'power3.out' },
+        });
+        rtl.from('.reviews-head .section-label', { y: 16, opacity: 0, duration: 0.45 })
+          .from('.reviews-head h2', { y: 22, opacity: 0, duration: 0.55 }, '-=0.3')
+          .from('.rev-stage', { y: 40, opacity: 0, duration: 0.7 }, '-=0.3')
+          .from('.rev-controls', { y: 16, opacity: 0, duration: 0.45 }, '-=0.4');
       });
       return () => mm.revert();
     }, homeRef);
@@ -103,6 +147,19 @@ function HomeContent() {
     fetch('/api/discussions')
       .then(res => res.ok ? res.json() : [])
       .then(setAllDiscussions)
+      .catch(() => {});
+  }, []);
+
+  // Approved student reviews replace the hardcoded testimonials when present.
+  useEffect(() => {
+    fetch('/api/reviews')
+      .then(res => res.ok ? res.json() : [])
+      .then((data: { name: string; level: string; rating: number; text: string }[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setReviewList(data.map(r => ({ name: r.name, course: r.level, text: r.text, rating: r.rating })));
+          setReviewIndex(0);
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -152,6 +209,12 @@ function HomeContent() {
       window.history.pushState(null, '', '/register?class=group');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goToStep(action: JourneyStep['action']) {
+    if (action === 'classes') { document.getElementById('classes')?.scrollIntoView({ behavior: 'smooth' }); return; }
+    if (action === 'reviews') { document.querySelector('.reviews')?.scrollIntoView({ behavior: 'smooth' }); return; }
+    showView(action);
   }
 
   function openDetail(id: number) {
@@ -316,6 +379,29 @@ function HomeContent() {
           </div>
         </section>
         <div className="selection-wrap w-full">
+          <section className="journey" id="journey" aria-labelledby="journey-title">
+            <div className="journey-head">
+              <span className="section-label journey-label">How it works</span>
+              <h2 id="journey-title">Your learning <em>journey</em></h2>
+              <p>Five simple steps — from first hello to confident, fluent conversation.</p>
+            </div>
+            <div className="journey-track">
+              <span className="journey-line" aria-hidden="true"></span>
+              {JOURNEY_STEPS.map((s) => (
+                <button key={s.n} className="journey-step" onClick={() => goToStep(s.action)} aria-label={`Step ${s.n}: ${s.title}`}>
+                  <span className="journey-node"><span className="journey-num">{s.n}</span></span>
+                  <span className="journey-body">
+                    <span className="journey-title">{s.title}</span>
+                    <span className="journey-desc">{s.desc}</span>
+                    <span className="journey-cta">
+                      {s.cta}
+                      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
           <div className="class-banner-wrap" id="classes">
             <section className="class-banner">
               <div className="class-banner-copy">
@@ -333,7 +419,7 @@ function HomeContent() {
                 </button>
               </div>
               <div className="class-banner-art" aria-hidden="true">
-                <img src="/images/group-discussions.webp" alt="" />
+                <img src="/images/live-group-discussions.webp" alt="" />
               </div>
             </section>
           </div>
@@ -390,6 +476,49 @@ function HomeContent() {
               </div>
             </div>
           )}
+
+          <div className="reviews">
+            <div className="reviews-head">
+              <span className="section-label reviews-label">What students say</span>
+              <h2>Loved by <em>learners</em></h2>
+            </div>
+            <div className="reviews-carousel">
+              <div className="rev-stage">
+                {reviewList.map((t, i) => {
+                  const rel = (i - reviewIndex + reviewList.length) % reviewList.length;
+                  const pos = rel === 0 ? 'is-active' : rel === 1 ? 'is-next' : rel === reviewList.length - 1 ? 'is-prev' : 'is-hidden';
+                  return (
+                    <article key={i} className={`rev-slide ${pos}`} aria-hidden={pos !== 'is-active'}>
+                      <span className="rev-avatar" aria-hidden="true">{t.name.charAt(0)}</span>
+                      <span className="rev-name">{t.name}</span>
+                      <span className="rev-course">{t.course}</span>
+                      {typeof t.rating === 'number' && (
+                        <span className="rev-stars" aria-label={`${t.rating} out of 5 stars`}>
+                          {[1, 2, 3, 4, 5].map(n => (
+                            <svg key={n} viewBox="0 0 24 24" className={n <= t.rating! ? 'on' : 'off'}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                          ))}
+                        </span>
+                      )}
+                      <p className="rev-text">{t.text}</p>
+                    </article>
+                  );
+                })}
+              </div>
+              <div className="rev-controls">
+                <button className="rev-nav rev-prev" aria-label="Previous review" onClick={() => setReviewIndex(i => (i - 1 + reviewList.length) % reviewList.length)}>
+                  <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+                <div className="rev-dots">
+                  {reviewList.map((_, i) => (
+                    <button key={i} className={`rev-dot ${i === reviewIndex ? 'active' : ''}`} aria-label={`Go to review ${i + 1}`} onClick={() => setReviewIndex(i)} />
+                  ))}
+                </div>
+                <button className="rev-nav rev-next" aria-label="Next review" onClick={() => setReviewIndex(i => (i + 1) % reviewList.length)}>
+                  <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div className="disc-cta-row home-cta-row">
             <div className="disc-cta-card">
