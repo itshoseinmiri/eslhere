@@ -756,20 +756,22 @@ function HomeContent() {
             {completedDiscussions.length === 0 ? (
               <div className="disc-empty">No completed discussions yet</div>
             ) : (
-              <div className="disc-completed-list">
+              <div className="disc-grid">
                 {completedDiscussions.map((d, i) => {
                   const discDates = d.dates && d.dates.length > 0 ? d.dates : (d.date ? [{ date: d.date, time: d.time }] : []);
                   return (
-                  <div key={d.id} className="disc-card disc-completed disc-card-wide" style={{ animationDelay: `${0.15 + i * 0.08}s`, cursor: 'pointer' }} onClick={() => openDetail(d.id)}>
+                  <div key={d.id} className="disc-card disc-completed" style={{ animationDelay: `${0.15 + i * 0.08}s`, cursor: 'pointer' }} onClick={() => openDetail(d.id)}>
+                    <div className="disc-card-head">
+                      <span className="disc-date-badge disc-date-badge-done">
+                        <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        {discDates[0]?.date || 'Completed'}
+                      </span>
+                      {discDates.length > 1 && <span className="disc-date-badge disc-date-badge-extra">+{discDates.length - 1}</span>}
+                      <span className="disc-status disc-status-ended">Ended</span>
+                    </div>
+                    {d.thumbnail && <img src={d.thumbnail} alt="" className="disc-card-thumb" />}
                     <div className="disc-card-inner">
-                      <div className="disc-card-head">
-                        <span className="disc-date-badge disc-date-badge-done">
-                          <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          {discDates[0]?.date || 'Completed'}
-                        </span>
-                        <span className="disc-level">{d.level}</span>
-                        <span className="disc-status disc-status-ended">Ended</span>
-                      </div>
+                      <span className="disc-level">{d.level}</span>
                       <h3 className="disc-topic">{d.topic}</h3>
                       <p className="disc-desc">{d.description}</p>
                       <div className="disc-card-bottom">
@@ -795,7 +797,6 @@ function HomeContent() {
                         </span>
                       </div>
                     </div>
-                    {d.thumbnail && <img src={d.thumbnail} alt="" className="disc-wide-thumb" />}
                   </div>
                   );
                 })}
