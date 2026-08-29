@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useRef, useState } from 'react';
+import type { CSSProperties, TouchEvent as ReactTouchEvent, TransitionEvent as ReactTransitionEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -20,6 +21,9 @@ const JOURNEY_STEPS: JourneyStep[] = [
   { n: '04', title: 'Start Learning', desc: 'Begin your personalized path with the right class and a clear plan.', cta: 'Enroll now', action: 'private' },
   { n: '05', title: 'Feedback & Progress', desc: 'Regular reviews and honest feedback keep your journey on track.', cta: 'See student results', action: 'reviews' },
 ];
+
+// reviews shown side by side in the testimonials row
+const REVIEWS_PER_VIEW = 3;
 
 type Testimonial = { name: string; course: string; text: string };
 const TESTIMONIALS: Testimonial[] = [
@@ -49,17 +53,16 @@ function HomeContent() {
   const [selectedDisc, setSelectedDisc] = useState<number | null>(null);
   const [enrollSuccess, setEnrollSuccess] = useState(false);
   const [reviewIndex, setReviewIndex] = useState(0);
-  const [reviewDir, setReviewDir] = useState<1 | -1>(1);
+  const [reviewAnimate, setReviewAnimate] = useState(true);
   const [reviewList, setReviewList] = useState<{ name: string; course: string; text: string; rating?: number }[]>(TESTIMONIALS);
   const logoRef = useRef<HTMLImageElement>(null);
   const logoClicksRef = useRef(0);
   const logoTimerRef = useRef<NodeJS.Timeout | null>(null);
   const reviewTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isTransitioningRef = useRef(false);
-  const prevReviewIndexRef = useRef(0);
-  const enteringIdxRef = useRef<number | null>(null);
   const reviewIndexRef = useRef(0);
   const reviewListRef = useRef(reviewList);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const homeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -140,7 +143,8 @@ function HomeContent() {
         });
         rtl.from('.reviews-head .reviews-eyebrow', { y: 16, opacity: 0, duration: 0.45 })
           .from('.reviews-head h2', { y: 22, opacity: 0, duration: 0.55 }, '-=0.3')
-          .from('.reviews-track', { y: 40, opacity: 0, duration: 0.7 }, '-=0.25');
+          // target the viewport, not the track — GSAP would leave an inline transform on the sliding strip
+          .from('.reviews-viewport', { y: 40, opacity: 0, duration: 0.7 }, '-=0.25');
       });
       return () => mm.revert();
     }, homeRef);
@@ -163,28 +167,77 @@ function HomeContent() {
       .then((data: { name: string; level: string; rating: number; text: string }[]) => {
         if (Array.isArray(data) && data.length > 0) {
           setReviewList(data.map(r => ({ name: r.name, course: r.level, text: r.text, rating: r.rating })));
+          // swapping the list mid-cycle: snap the strip back to the start rather than sliding to it
+          setReviewAnimate(false);
           setReviewIndex(0);
+          reviewIndexRef.current = 0;
         }
       })
       .catch(() => {});
   }, []);
 
-  const advanceReview = (dir: 1 | -1) => {
+  // slides the strip by exactly one card; the appended clones make the wrap seamless
+  const advanceReview = (dir: 1 | -1, manual = false) => {
     if (isTransitioningRef.current) return;
     const n = reviewListRef.current.length;
-    if (n === 0) return;
-    const nextIdx = (reviewIndexRef.current + dir + n) % n;
+    // nothing to slide when every review already fits in the row
+    if (n <= REVIEWS_PER_VIEW) return;
+    const cur = reviewIndexRef.current;
+    // stepping off either end: snap onto the matching clone first (no transition), then slide from there
+    const from = dir === 1 ? (cur >= n ? 0 : cur) : (cur <= 0 ? n : cur);
     isTransitioningRef.current = true;
-    enteringIdxRef.current = nextIdx;
-    prevReviewIndexRef.current = reviewIndexRef.current;
-    setReviewDir(dir);
-    setReviewIndex(nextIdx);
-    setTimeout(() => { isTransitioningRef.current = false; enteringIdxRef.current = null; }, 620);
+    if (from === cur) {
+      setReviewAnimate(true);
+      setReviewIndex(from + dir);
+    } else {
+      setReviewAnimate(false);
+      setReviewIndex(from);
+      reviewIndexRef.current = from;
+      // two frames: one to paint the snap, one to slide away from it
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        setReviewAnimate(true);
+        setReviewIndex(from + dir);
+      }));
+    }
+    setTimeout(() => { isTransitioningRef.current = false; }, 700);
+    if (manual) restartReviewTimer();
+  };
+
+  // the strip landed on a clone — rewind to the real card while the transition is off
+  const settleReview = (e: ReactTransitionEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
+    if (reviewIndexRef.current >= reviewListRef.current.length) {
+      setReviewAnimate(false);
+      setReviewIndex(0);
+      reviewIndexRef.current = 0;
+    }
+  };
+
+  const onReviewTouchStart = (e: ReactTouchEvent<HTMLDivElement>) => {
+    const t = e.touches[0];
+    touchStartRef.current = t ? { x: t.clientX, y: t.clientY } : null;
+  };
+
+  const onReviewTouchEnd = (e: ReactTouchEvent<HTMLDivElement>) => {
+    const start = touchStartRef.current;
+    const t = e.changedTouches[0];
+    touchStartRef.current = null;
+    if (!start || !t) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    // horizontal flicks only — vertical drags stay page scrolls
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+    advanceReview(dx < 0 ? 1 : -1, true);
+  };
+
+  const restartReviewTimer = () => {
+    if (reviewTimerRef.current) clearInterval(reviewTimerRef.current);
+    reviewTimerRef.current = setInterval(() => advanceReview(1), 4000);
   };
 
   // autoplay every 4s — runs once, reads current values via refs so API list updates don't restart it
   useEffect(() => {
-    reviewTimerRef.current = setInterval(() => advanceReview(1), 4000);
+    restartReviewTimer();
     return () => { if (reviewTimerRef.current) clearInterval(reviewTimerRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -519,43 +572,35 @@ function HomeContent() {
             </div>
 
             {(() => {
-              if (reviewList.length === 0) return null;
               const n = reviewList.length;
-              const prevIdx = prevReviewIndexRef.current;
-              const enteringIdx = enteringIdxRef.current;
-              const isTransitioning = isTransitioningRef.current;
-
-              // Base offsets: prev, current, next
-              let offsets: number[] = [-1, 0, 1];
-              // During transition, add the leaving card (old active) as a 4th item
-              if (isTransitioning && enteringIdx !== null && n >= 3) {
-                const leavingOff = (prevIdx - reviewIndex + n) % n;
-                // Deduplicate: only add if not already in offsets
-                if (!offsets.includes(leavingOff)) {
-                  offsets = [...offsets, leavingOff];
-                }
-              }
-
-              const items = n >= 3
-                ? offsets.map(off => {
-                    const idx = (reviewIndex + off + n) % n;
-                    const isLeaving = isTransitioning && idx === prevIdx;
-                    const isEntering = isTransitioning && idx === enteringIdx;
-                    return { t: reviewList[idx]!, idx, off, isLeaving, isEntering };
-                  })
-                : reviewList.map((t, idx) => ({ t, idx, off: idx === reviewIndex ? 0 : 1, isLeaving: false, isEntering: false }));
+              if (n === 0) return null;
+              // three reviews per row — the strip slides one review at a time
+              const perView = Math.min(REVIEWS_PER_VIEW, n);
+              const sliding = n > perView;
+              // leading cards are cloned onto the tail so the strip can wrap without a visible jump
+              const strip = sliding ? [...reviewList, ...reviewList.slice(0, perView)] : reviewList;
+              // the middle slot is the featured one (no featured card when only two fit)
+              const centerOffset = perView === 2 ? -1 : Math.floor(perView / 2);
               return (
                 <>
-                  <div className="reviews-viewport">
-                    <div className="reviews-track" data-dir={reviewDir}>
-                      {items.map(({ t, idx, off, isLeaving, isEntering }) => {
-                        const isCenter = off === 0;
+                  <div
+                    className="reviews-viewport"
+                    onTouchStart={onReviewTouchStart}
+                    onTouchEnd={onReviewTouchEnd}
+                  >
+                    <div
+                      className={`reviews-track${reviewAnimate ? ' is-sliding' : ''}`}
+                      data-per-view={perView}
+                      style={{ '--rev-i': String(reviewIndex) } as CSSProperties}
+                      onTransitionEnd={settleReview}
+                    >
+                      {strip.map((t, i) => {
                         const rating = typeof t.rating === 'number' ? t.rating : 5;
+                        const isCenter = centerOffset >= 0 && i === reviewIndex + centerOffset;
                         return (
                           <div
-                            key={`${idx}-${off}-${isLeaving ? 'l' : isEntering ? 'e' : 's'}`}
-                            className={`reviews-card-wrap ${isCenter ? 'is-active' : 'is-side'} ${off === -1 ? 'is-prev' : off === 1 ? 'is-next' : off === 2 ? 'is-next' : ''} ${isLeaving ? 'is-leaving' : ''} ${isEntering ? 'is-entering' : ''}`}
-                            aria-hidden={!isCenter && !isLeaving && !isEntering}
+                            key={i}
+                            className={`reviews-card-wrap ${isCenter ? 'is-center' : 'is-side'}`}
                           >
                             <div className="reviews-card">
                               <div className="reviews-quote">
@@ -583,16 +628,18 @@ function HomeContent() {
                       })}
                     </div>
                   </div>
+                  {n > perView && (
                     <div className="reviews-nav-wrap">
-                    <div className="reviews-nav">
-                      <button className="reviews-nav-btn" aria-label="Previous review" onClick={() => advanceReview(-1)}>
-                        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      </button>
-                      <button className="reviews-nav-btn" aria-label="Next review" onClick={() => advanceReview(1)}>
-                        <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      </button>
+                      <div className="reviews-nav">
+                        <button className="reviews-nav-btn" aria-label="Previous review" onClick={() => advanceReview(-1, true)}>
+                          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                        <button className="reviews-nav-btn" aria-label="Next review" onClick={() => advanceReview(1, true)}>
+                          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </>
               );
             })()}
