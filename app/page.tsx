@@ -49,10 +49,17 @@ function HomeContent() {
   const [selectedDisc, setSelectedDisc] = useState<number | null>(null);
   const [enrollSuccess, setEnrollSuccess] = useState(false);
   const [reviewIndex, setReviewIndex] = useState(0);
+  const [reviewDir, setReviewDir] = useState<1 | -1>(1);
   const [reviewList, setReviewList] = useState<{ name: string; course: string; text: string; rating?: number }[]>(TESTIMONIALS);
   const logoRef = useRef<HTMLImageElement>(null);
   const logoClicksRef = useRef(0);
   const logoTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const reviewTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isTransitioningRef = useRef(false);
+  const prevReviewIndexRef = useRef(0);
+  const enteringIdxRef = useRef<number | null>(null);
+  const reviewIndexRef = useRef(0);
+  const reviewListRef = useRef(reviewList);
   const homeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -133,7 +140,7 @@ function HomeContent() {
         });
         rtl.from('.reviews-head .reviews-eyebrow', { y: 16, opacity: 0, duration: 0.45 })
           .from('.reviews-head h2', { y: 22, opacity: 0, duration: 0.55 }, '-=0.3')
-          .from('.reviews-card', { y: 40, opacity: 0, duration: 0.7 }, '-=0.25');
+          .from('.reviews-track', { y: 40, opacity: 0, duration: 0.7 }, '-=0.25');
       });
       return () => mm.revert();
     }, homeRef);
@@ -161,6 +168,32 @@ function HomeContent() {
       })
       .catch(() => {});
   }, []);
+
+  const advanceReview = (dir: 1 | -1) => {
+    if (isTransitioningRef.current) return;
+    const n = reviewListRef.current.length;
+    if (n === 0) return;
+    const nextIdx = (reviewIndexRef.current + dir + n) % n;
+    isTransitioningRef.current = true;
+    enteringIdxRef.current = nextIdx;
+    prevReviewIndexRef.current = reviewIndexRef.current;
+    setReviewDir(dir);
+    setReviewIndex(nextIdx);
+    setTimeout(() => { isTransitioningRef.current = false; enteringIdxRef.current = null; }, 620);
+  };
+
+  // autoplay every 4s — runs once, reads current values via refs so API list updates don't restart it
+  useEffect(() => {
+    reviewTimerRef.current = setInterval(() => advanceReview(1), 4000);
+    return () => { if (reviewTimerRef.current) clearInterval(reviewTimerRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // keep index ref in sync with state
+  useEffect(() => { reviewIndexRef.current = reviewIndex; }, [reviewIndex]);
+
+  // keep list ref in sync with state (API updates don't restart autoplay interval)
+  useEffect(() => { reviewListRef.current = reviewList; }, [reviewList]);
 
   const upcomingDiscussions = allDiscussions.filter(d => d.status === 'upcoming');
   const completedDiscussions = allDiscussions.filter(d => d.status === 'completed');
@@ -486,38 +519,81 @@ function HomeContent() {
             </div>
 
             {(() => {
-              const t = reviewList[reviewIndex] ?? reviewList[0];
-              if (!t) return null;
-              const rating = typeof t.rating === 'number' ? t.rating : 5;
+              if (reviewList.length === 0) return null;
+              const n = reviewList.length;
+              const prevIdx = prevReviewIndexRef.current;
+              const enteringIdx = enteringIdxRef.current;
+              const isTransitioning = isTransitioningRef.current;
+
+              // Base offsets: prev, current, next
+              let offsets: number[] = [-1, 0, 1];
+              // During transition, add the leaving card (old active) as a 4th item
+              if (isTransitioning && enteringIdx !== null && n >= 3) {
+                const leavingOff = (prevIdx - reviewIndex + n) % n;
+                // Deduplicate: only add if not already in offsets
+                if (!offsets.includes(leavingOff)) {
+                  offsets = [...offsets, leavingOff];
+                }
+              }
+
+              const items = n >= 3
+                ? offsets.map(off => {
+                    const idx = (reviewIndex + off + n) % n;
+                    const isLeaving = isTransitioning && idx === prevIdx;
+                    const isEntering = isTransitioning && idx === enteringIdx;
+                    return { t: reviewList[idx]!, idx, off, isLeaving, isEntering };
+                  })
+                : reviewList.map((t, idx) => ({ t, idx, off: idx === reviewIndex ? 0 : 1, isLeaving: false, isEntering: false }));
               return (
-                <div className="reviews-card">
-                  <div className="reviews-quote">
-                    <span className="reviews-stars" aria-label={`${rating} out of 5 stars`}>
-                      {[1, 2, 3, 4, 5].map(n => (
-                        <svg key={n} viewBox="0 0 24 24" className={n <= rating ? 'on' : 'off'}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                      ))}
-                    </span>
-                    <p className="reviews-text" key={reviewIndex}>{t.text}</p>
-                    <div className="reviews-meta">
-                      <div className="reviews-author">
-                        <span className="reviews-name">{t.name}</span>
-                        <span className="reviews-role">{t.course}</span>
-                      </div>
-                      <div className="reviews-nav">
-                        <button className="reviews-nav-btn" aria-label="Previous review" onClick={() => setReviewIndex(i => (i - 1 + reviewList.length) % reviewList.length)}>
-                          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </button>
-                        <button className="reviews-nav-btn" aria-label="Next review" onClick={() => setReviewIndex(i => (i + 1) % reviewList.length)}>
-                          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </button>
-                      </div>
+                <>
+                  <div className="reviews-viewport">
+                    <div className="reviews-track" data-dir={reviewDir}>
+                      {items.map(({ t, idx, off, isLeaving, isEntering }) => {
+                        const isCenter = off === 0;
+                        const rating = typeof t.rating === 'number' ? t.rating : 5;
+                        return (
+                          <div
+                            key={`${idx}-${off}-${isLeaving ? 'l' : isEntering ? 'e' : 's'}`}
+                            className={`reviews-card-wrap ${isCenter ? 'is-active' : 'is-side'} ${off === -1 ? 'is-prev' : off === 1 ? 'is-next' : off === 2 ? 'is-next' : ''} ${isLeaving ? 'is-leaving' : ''} ${isEntering ? 'is-entering' : ''}`}
+                            aria-hidden={!isCenter && !isLeaving && !isEntering}
+                          >
+                            <div className="reviews-card">
+                              <div className="reviews-quote">
+                                <span className="reviews-stars" aria-label={`${rating} out of 5 stars`}>
+                                  {[1, 2, 3, 4, 5].map(s => (
+                                    <svg key={s} viewBox="0 0 24 24" className={s <= rating ? 'on' : 'off'}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                                  ))}
+                                </span>
+                                <p className="reviews-text">{t.text}</p>
+                                <div className="reviews-meta">
+                                  <div className="reviews-author">
+                                    <div className="reviews-portrait" aria-hidden="true">
+                                      <span className="reviews-portrait-initial">{t.name.charAt(0)}</span>
+                                    </div>
+                                    <div className="reviews-author-text">
+                                      <span className="reviews-name">{t.name}</span>
+                                      <span className="reviews-role">{t.course}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-
-                  <div className="reviews-portrait" aria-hidden="true">
-                    <span className="reviews-portrait-initial">{t.name.charAt(0)}</span>
+                    <div className="reviews-nav-wrap">
+                    <div className="reviews-nav">
+                      <button className="reviews-nav-btn" aria-label="Previous review" onClick={() => advanceReview(-1)}>
+                        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </button>
+                      <button className="reviews-nav-btn" aria-label="Next review" onClick={() => advanceReview(1)}>
+                        <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </>
               );
             })()}
           </div>

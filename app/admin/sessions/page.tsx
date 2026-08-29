@@ -656,7 +656,7 @@ export default function SessionsPage() {
           margin-bottom: 26px;
         }
         .ss-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1.4rem;
           font-weight: 700;
           color: #1a2e44;
@@ -679,7 +679,7 @@ export default function SessionsPage() {
           align-items: center;
           gap: 6px;
           padding: 9px 20px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.8rem;
           font-weight: 600;
           color: #fff;
@@ -745,7 +745,7 @@ export default function SessionsPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1.05rem;
           font-weight: 700;
           color: #1a2e44;
@@ -763,7 +763,7 @@ export default function SessionsPage() {
           letter-spacing: 0.01em;
         }
         .ss-stat-value {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1.55rem;
           font-weight: 700;
           color: #1a2e44;
@@ -834,7 +834,7 @@ export default function SessionsPage() {
           align-items: center;
           gap: 4px;
           padding: 6px 14px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.74rem;
           font-weight: 600;
           color: #2563eb;
@@ -881,7 +881,7 @@ export default function SessionsPage() {
         .ss-search {
           width: 100%;
           padding: 8px 12px 8px 34px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.8rem;
           color: #1a2e44;
           background: #fff;
@@ -912,7 +912,7 @@ export default function SessionsPage() {
         .ss-tabs::-webkit-scrollbar { display: none; }
         .ss-tab {
           padding: 7px 14px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem;
           font-weight: 500;
           color: #7a8f9e;
@@ -939,7 +939,7 @@ export default function SessionsPage() {
 
         /* ── Section label ── */
         .ss-section-label {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem;
           font-weight: 600;
           color: #1a2e44;
@@ -1002,14 +1002,14 @@ export default function SessionsPage() {
           width: 38px; height: 38px; min-width: 38px;
           border-radius: 10px;
           display: flex; align-items: center; justify-content: center;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em;
         }
 
         .ss-row-info { min-width: 0; display: flex; align-items: center; gap: 14px; }
         .ss-row-info-text { min-width: 0; flex: 1; }
         .ss-row-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.84rem;
           font-weight: 600;
           color: #1a2e44;
@@ -1029,7 +1029,7 @@ export default function SessionsPage() {
         .ss-countdown { display: flex; gap: 10px; align-items: flex-start; }
         .ss-cd-unit { display: flex; flex-direction: column; align-items: center; min-width: 32px; }
         .ss-cd-val {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.95rem; font-weight: 700; color: #1a2e44;
           font-variant-numeric: tabular-nums; line-height: 1;
         }
@@ -1053,7 +1053,7 @@ export default function SessionsPage() {
         .ss-go-class-btn {
           display: inline-flex; align-items: center; gap: 4px;
           padding: 5px 14px; border-radius: 6px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.74rem; font-weight: 600;
           color: #fff; background: #2563eb;
           border: none;
@@ -1082,7 +1082,7 @@ export default function SessionsPage() {
 
         .ss-row-date { min-width: 0; }
         .ss-row-date-day {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.8rem; font-weight: 600; color: #1a2e44;
           letter-spacing: -0.01em; white-space: nowrap;
         }
@@ -1111,7 +1111,7 @@ export default function SessionsPage() {
         }
         .ss-drop-item {
           display: flex; align-items: center; gap: 9px; width: 100%;
-          padding: 9px 12px; font-family: 'Poppins', sans-serif;
+          padding: 9px 12px; font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem; font-weight: 450; color: #3d5468;
           background: none; border: none; border-radius: 6px;
           cursor: pointer; transition: background 0.12s; text-align: left; white-space: nowrap;
@@ -1134,7 +1134,7 @@ export default function SessionsPage() {
           width: 30px; height: 30px;
           display: flex; align-items: center; justify-content: center;
           border-radius: 6px; border: 1px solid #e2e9ef; background: #fff;
-          font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 500;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.75rem; font-weight: 500;
           color: #5f7a8f; cursor: pointer; transition: all 0.15s;
         }
         .ss-page-btn:hover { border-color: #2db5c0; color: #2a6270; }
@@ -1157,7 +1157,7 @@ export default function SessionsPage() {
         @keyframes ss-spin { to { transform: rotate(360deg); } }
         .ss-loading {
           display: flex; align-items: center; justify-content: center; height: 40vh;
-          font-family: 'Poppins', sans-serif; font-size: 0.85rem; color: #94a7b5;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.85rem; color: #94a7b5;
         }
         .ss-loading-ring {
           width: 16px; height: 16px; border: 2px solid #e2e9ef;
@@ -1272,7 +1272,7 @@ export default function SessionsPage() {
         .cal-today-btn {
           padding: 7px 16px; border-radius: 8px;
           border: 1px solid #e2e9ef; background: #fff;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem; font-weight: 600; color: #3d5468;
           cursor: pointer; transition: all 0.15s; white-space: nowrap;
         }
@@ -1296,7 +1296,7 @@ export default function SessionsPage() {
           display: flex; align-items: center; gap: 8px;
           padding: 7px 14px; border-radius: 8px;
           border: 1px solid #e2e9ef; background: #fff;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem; font-weight: 600; color: #1a2e44;
           letter-spacing: -0.01em; white-space: nowrap;
         }
@@ -1315,7 +1315,7 @@ export default function SessionsPage() {
           display: flex; align-items: center; gap: 6px;
           padding: 6px 14px; border-radius: 6px;
           border: none; background: none;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.76rem; font-weight: 500; color: #7a8f9e;
           cursor: pointer; transition: all 0.15s; white-space: nowrap;
           position: relative;
@@ -1376,7 +1376,7 @@ export default function SessionsPage() {
           display: flex; align-items: center; justify-content: space-between; gap: 8px;
         }
         .cal-pin-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.88rem; font-weight: 700; color: #1a2e44;
           line-height: 1.3;
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1394,7 +1394,7 @@ export default function SessionsPage() {
           fill: none; stroke-linecap: round; stroke-linejoin: round;
         }
         .cal-pin-time {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.76rem; font-weight: 500; color: #7a8f9e;
         }
         .cal-pin-footer {
@@ -1404,7 +1404,7 @@ export default function SessionsPage() {
         }
         .cal-pin-status {
           display: flex; align-items: center; gap: 6px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.72rem; font-weight: 600;
         }
         .cal-pin-status svg {
@@ -1412,7 +1412,7 @@ export default function SessionsPage() {
           fill: none; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0;
         }
         .cal-pin-action {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.72rem; font-weight: 600; color: inherit;
           background: none; border: none; cursor: pointer;
           text-decoration: underline; text-underline-offset: 2px;
@@ -1451,7 +1451,7 @@ export default function SessionsPage() {
         }
         .cal-day-head:last-child { border-right: none; }
         .cal-day-num {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1.05rem; font-weight: 700; color: #1a2e44;
           line-height: 1; letter-spacing: -0.02em;
         }
@@ -1549,7 +1549,7 @@ export default function SessionsPage() {
           z-index: 20 !important;
         }
         .cal-session-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem; font-weight: 700;
           line-height: 1.2;
           overflow: hidden; text-overflow: ellipsis;
@@ -1630,7 +1630,7 @@ export default function SessionsPage() {
           transition: top 0.06s ease;
         }
         .cal-ghost-time {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.65rem; font-weight: 600;
           color: #2db5c0; line-height: 1;
         }
@@ -1656,12 +1656,12 @@ export default function SessionsPage() {
         }
         .cal-new-pop-datetime { display: flex; flex-direction: column; gap: 2px; }
         .cal-new-pop-date {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.72rem; font-weight: 600; color: #94a7b5;
           text-transform: uppercase; letter-spacing: 0.06em;
         }
         .cal-new-pop-time {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.95rem; font-weight: 700; color: #1a2e44;
           letter-spacing: -0.02em;
         }
@@ -1675,7 +1675,7 @@ export default function SessionsPage() {
         .cal-new-pop-close svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; }
         .cal-new-pop-title {
           width: 100%; padding: 8px 10px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.84rem; color: #1a2e44;
           background: #f9fbfc; border: 1px solid #e2e9ef; border-radius: 8px;
           outline: none; transition: border-color 0.15s, box-shadow 0.15s;
@@ -1684,7 +1684,7 @@ export default function SessionsPage() {
         .cal-new-pop-title:focus { border-color: #2db5c0; box-shadow: 0 0 0 3px rgba(45,181,192,0.08); background: #fff; }
         .cal-new-pop-select {
           width: 100%; padding: 8px 10px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.8rem; color: #1a2e44;
           background: #f9fbfc; border: 1px solid #e2e9ef; border-radius: 8px;
           outline: none; cursor: pointer; transition: border-color 0.15s;
@@ -1700,7 +1700,7 @@ export default function SessionsPage() {
         }
         .cal-new-pop-dur {
           flex: 1; padding: 6px 0;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.72rem; font-weight: 600; color: #7a8f9e;
           background: #f5f7fa; border: 1px solid transparent; border-radius: 7px;
           cursor: pointer; transition: all 0.12s;
@@ -1716,7 +1716,7 @@ export default function SessionsPage() {
         }
         .cal-new-pop-cancel {
           flex: 1; padding: 8px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem; font-weight: 500; color: #7a8f9e;
           background: #f5f7fa; border: none; border-radius: 8px;
           cursor: pointer; transition: all 0.12s;
@@ -1724,7 +1724,7 @@ export default function SessionsPage() {
         .cal-new-pop-cancel:hover { background: #eceff2; color: #3d5468; }
         .cal-new-pop-save {
           flex: 2; padding: 8px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem; font-weight: 600; color: #fff;
           background: #1a2e44; border: none; border-radius: 8px;
           cursor: pointer; transition: background 0.15s;
@@ -1735,7 +1735,7 @@ export default function SessionsPage() {
           display: flex; align-items: flex-start; gap: 6px;
           padding: 8px 10px; border-radius: 7px;
           background: #fef2f2; border: 1px solid #fecaca;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.72rem; font-weight: 500; color: #dc2626;
           line-height: 1.4;
         }
@@ -1837,7 +1837,7 @@ export default function SessionsPage() {
         .cal-portal-item {
           display: flex; align-items: center;
           width: 100%; padding: 8px 10px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.76rem; font-weight: 500; color: #3d5468;
           background: none; border: none; border-radius: 6px;
           cursor: pointer; transition: background 0.1s; text-align: left; white-space: nowrap;
@@ -1890,7 +1890,7 @@ export default function SessionsPage() {
           stroke-linecap: round;
         }
         .cancel-modal-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1rem; font-weight: 700; color: #1a2e44;
           letter-spacing: -0.02em; line-height: 1;
         }
@@ -1904,7 +1904,7 @@ export default function SessionsPage() {
         }
         .cancel-modal-keep {
           flex: 1; padding: 10px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.82rem; font-weight: 500; color: #5f7a8f;
           background: #f5f7fa; border: none; border-radius: 9px;
           cursor: pointer; transition: background 0.13s;
@@ -1912,7 +1912,7 @@ export default function SessionsPage() {
         .cancel-modal-keep:hover { background: #e9edf1; color: #1a2e44; }
         .cancel-modal-confirm {
           flex: 1; padding: 10px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.82rem; font-weight: 600; color: #fff;
           background: #dc2626; border: none; border-radius: 9px;
           cursor: pointer; transition: background 0.13s;

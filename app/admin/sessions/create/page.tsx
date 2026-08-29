@@ -303,7 +303,7 @@ function CreateSessionContent() {
           animation: cs-page-in 0.4s ease-out 0.04s both;
         }
         .cs-page-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1.5rem;
           font-weight: 700;
           color: #1a2e44;
@@ -322,7 +322,7 @@ function CreateSessionContent() {
           align-items: center;
           gap: 6px;
           padding: 9px 20px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.8rem;
           font-weight: 500;
           color: #5f7a8f;
@@ -371,7 +371,7 @@ function CreateSessionContent() {
           fill: none; stroke-linecap: round; stroke-linejoin: round;
         }
         .cs-card-header-text h3 {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.92rem;
           font-weight: 600;
           color: #1a2e44;
@@ -408,7 +408,7 @@ function CreateSessionContent() {
         .cs-input {
           width: 100%;
           padding: 11px 14px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.84rem;
           color: #1a2e44;
           background: #fafbfc;
@@ -466,7 +466,7 @@ function CreateSessionContent() {
           align-items: center;
           gap: 12px;
           padding: 10px 14px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.84rem;
           color: #1a2e44;
           background: #fafbfc;
@@ -547,7 +547,7 @@ function CreateSessionContent() {
         .cs-student-search {
           width: 100%;
           padding: 8px 10px 8px 30px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.78rem;
           color: #1a2e44;
           background: #f7f9fb;
@@ -616,7 +616,7 @@ function CreateSessionContent() {
         }
         .cs-topic-chip {
           padding: 7px 14px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.74rem;
           font-weight: 500;
           color: #5f7a8f;
@@ -672,7 +672,7 @@ function CreateSessionContent() {
         .cs-duration-pill.active .cs-dur-val { color: #1a7a82; }
         .cs-duration-pill.active .cs-dur-desc { color: #5ba5ad; }
         .cs-dur-val {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.95rem;
           font-weight: 700;
           color: #3d5468;
@@ -704,7 +704,7 @@ function CreateSessionContent() {
           margin-bottom: 16px;
         }
         .cs-summary-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1.08rem;
           font-weight: 700;
           color: #1a2e44;
@@ -766,7 +766,7 @@ function CreateSessionContent() {
         .cs-submit-btn {
           width: 100%;
           padding: 13px 20px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.86rem;
           font-weight: 600;
           color: #fff;
@@ -856,7 +856,7 @@ function CreateSessionContent() {
           animation: cs-check-draw 0.5s ease-out 0.45s both;
         }
         .cs-success-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1.2rem;
           font-weight: 700;
           color: #1a2e44;

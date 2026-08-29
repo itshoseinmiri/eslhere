@@ -71,7 +71,7 @@ export default function AdminsPage() {
           margin-bottom: 24px;
         }
         .rl-title {
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 1.3rem;
           font-weight: 600;
           color: #1a2e44;
@@ -110,7 +110,7 @@ export default function AdminsPage() {
         .rl-search {
           width: 100%;
           padding: 9px 14px 9px 38px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.8125rem;
           color: #1a2e44;
           background: #fff;
@@ -139,7 +139,7 @@ export default function AdminsPage() {
         .rl-table th {
           padding: 12px 16px;
           text-align: left;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-weight: 500;
           color: #8ba3b5;
           text-transform: uppercase;
@@ -245,7 +245,7 @@ export default function AdminsPage() {
           padding: 7px 12px;
           border: none;
           background: none;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.8125rem;
           font-weight: 400;
           color: #5f7a8f;
@@ -299,7 +299,7 @@ export default function AdminsPage() {
           border-radius: 6px;
           border: 1px solid #d8e3ec;
           background: #fff;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.75rem;
           font-weight: 500;
           color: #5f7a8f;
@@ -361,7 +361,7 @@ export default function AdminsPage() {
           color: white;
           padding: 11px 22px;
           border-radius: 8px;
-          font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif;
           font-size: 0.8125rem;
           z-index: 300;
           transition: transform 0.3s;

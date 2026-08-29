@@ -17,8 +17,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: 'Poppins', 'Vazirmatn', system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
+  --font-persian: 'Vazirmatn', 'Poppins', Tahoma, sans-serif;
 }
 
 * {
@@ -28,7 +29,7 @@
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', Tahoma, system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -38,6 +39,25 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Persian Font Support (Vazirmatn) ── */
+/* Poppins lacks Persian/Arabic glyphs → Vazirmatn auto-fallback for fa/ar script.
+   These rules ensure Persian text renders optimally when lang/dir indicates it. */
+:lang(fa),
+:lang(ar),
+[dir='rtl'] {
+  font-family: 'Vazirmatn', 'Poppins', Tahoma, sans-serif;
+}
+
+.font-persian,
+.font-fa {
+  font-family: 'Vazirmatn', 'Poppins', Tahoma, sans-serif !important;
+}
+
+.font-english,
+.font-en {
+  font-family: 'Poppins', 'Vazirmatn', sans-serif !important;
 }
 
 .error-toast,
@@ -260,7 +280,7 @@ body {
   gap: 10px;
   width: 100%;
   padding: 9px 12px;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', 'Vazirmatn', sans-serif;
   font-size: 0.78rem;
   color: var(--muted);
   background: none;

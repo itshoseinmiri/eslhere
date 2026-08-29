@@ -118,7 +118,7 @@ export default function SessionDetailPage() {
       <style jsx global>{`
         /* ── Session Detail tokens ── */
         .sd-page {
-          --sd-font: 'Poppins', sans-serif;
+          --sd-font: 'Poppins', 'Vazirmatn', sans-serif;
           --sd-bg: #f9fbfc;
           --sd-surface: #ffffff;
           --sd-text: #1a2e44;
@@ -696,19 +696,19 @@ export default function SessionDetailPage() {
           margin-bottom: 2px;
         }
         .cancel-modal-icon svg { width: 20px; height: 20px; stroke: #dc2626; stroke-width: 2; fill: none; stroke-linecap: round; }
-        .cancel-modal-title { font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 700; color: #1a2e44; letter-spacing: -0.02em; }
+        .cancel-modal-title { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1rem; font-weight: 700; color: #1a2e44; letter-spacing: -0.02em; }
         .cancel-modal-body { font-size: 0.8rem; color: #5f7a8f; line-height: 1.55; max-width: 260px; }
         .cancel-modal-body strong { color: #1a2e44; font-weight: 600; }
         .cancel-modal-actions { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
         .cancel-modal-keep {
           flex: 1; padding: 10px;
-          font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 500; color: #5f7a8f;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.82rem; font-weight: 500; color: #5f7a8f;
           background: #f5f7fa; border: none; border-radius: 9px; cursor: pointer; transition: background 0.13s;
         }
         .cancel-modal-keep:hover { background: #e9edf1; color: #1a2e44; }
         .cancel-modal-confirm {
           flex: 1; padding: 10px;
-          font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 600; color: #fff;
+          font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.82rem; font-weight: 600; color: #fff;
           background: #dc2626; border: none; border-radius: 9px; cursor: pointer; transition: background 0.13s;
         }
         .cancel-modal-confirm:hover:not(:disabled) { background: #b91c1c; }
