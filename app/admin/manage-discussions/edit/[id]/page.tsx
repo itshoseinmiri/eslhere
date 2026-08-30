@@ -481,8 +481,11 @@ export default function EditDiscussionPage({ params }: { params: Promise<{ id: s
           font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 700;
           display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        .cd-date-entry-fields { display: flex; gap: 10px; flex: 1; min-width: 0; }
+        .cd-date-entry-fields { display: flex; gap: 10px; flex: 1; min-width: 0; align-items: center; }
         .cd-date-entry-fields .cd-input { background: #fff; }
+        /* Date picker takes the free space, time stays a compact fixed width on desktop */
+        .cd-date-entry-fields .jdp { flex: 1 1 auto; min-width: 0; }
+        .cd-date-entry-fields input[type="time"] { flex: 0 0 auto; width: auto; min-width: 132px; }
         .cd-date-remove {
           width: 28px; height: 28px; border-radius: 6px; border: none;
           background: #fef2f2; color: #ef4444; cursor: pointer;
@@ -647,7 +650,9 @@ export default function EditDiscussionPage({ params }: { params: Promise<{ id: s
           .cd-grid { grid-template-columns: 1fr; }
           .cd-preview { position: static; }
           .cd-row { grid-template-columns: 1fr; }
-          .cd-date-entry-fields { flex-direction: column; }
+          .cd-date-entry-fields { flex-direction: column; align-items: stretch; }
+          .cd-date-entry-fields .jdp,
+          .cd-date-entry-fields input[type="time"] { width: 100%; min-width: 0; }
         }
       `}</style>
 

@@ -199,7 +199,7 @@ export default function JalaliDatePicker({
 
         .jdp-trigger {
           display: flex; align-items: center; justify-content: space-between; gap: 8px;
-          width: 100%; padding: 9px 13px; font-family: 'DM Sans', sans-serif;
+          width: 100%; padding: 9px 13px; font-family: 'Vazirmatn', 'DM Sans', sans-serif;
           font-size: 0.84rem; color: #1a2e44; background: #fff; text-align: left;
           border: 1px solid #d8e3ec; border-radius: 7px; cursor: pointer; outline: none;
           transition: border-color 0.2s, box-shadow 0.2s;
@@ -217,7 +217,7 @@ export default function JalaliDatePicker({
           width: 252px; box-sizing: border-box; padding: 12px;
           background: #fff; border: 1px solid #e6edf3; border-radius: 10px;
           box-shadow: 0 10px 30px rgba(26,46,68,0.12);
-          font-family: 'DM Sans', sans-serif;
+          font-family: 'Vazirmatn', 'DM Sans', sans-serif;
           animation: jdp-in 0.14s ease-out;
         }
         @keyframes jdp-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
