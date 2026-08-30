@@ -75,6 +75,20 @@ const TEACHER_ROLES = [
 ];
 const TEACHER_SKILLS = ['Learning Management', 'Teaching Learning', 'Adult Education', 'Critical Thinking'];
 
+// discussion detail: full-bleed hero banner behind the header. The gradient is
+// seeded from the discussion id so it looks random but stays stable across
+// re-renders and page reloads for the same discussion.
+function discussionGradient(seed: number) {
+  const rand = (n: number) => {
+    const x = Math.sin(seed * 9301 + n * 49297) * 233280;
+    return x - Math.floor(x);
+  };
+  const h1 = Math.floor(rand(1) * 360);
+  const h2 = (h1 + 40 + Math.floor(rand(2) * 90)) % 360;
+  const angle = Math.floor(rand(3) * 360);
+  return `linear-gradient(${angle}deg, hsl(${h1} 70% 60%), hsl(${h2} 64% 46%))`;
+}
+
 type Testimonial = { name: string; course: string; text: string };
 type Review = Testimonial & { rating?: number };
 const TESTIMONIALS: Testimonial[] = [
@@ -1114,6 +1128,7 @@ function HomeContent() {
           const lessonCount = curriculum.reduce((n, m) => n + (m.items?.length || 0), 0);
           return (
           <div className="dt-wrap">
+            <div className="dt-hero-banner" aria-hidden="true" style={{ backgroundImage: discussionGradient(activeDisc.id) }}></div>
             <button className="back-btn" onClick={() => { setView('discussions'); setEnrollSuccess(false); window.history.pushState(null, '', '/discussions'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
               <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Discussions
