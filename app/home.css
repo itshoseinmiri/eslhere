@@ -316,36 +316,56 @@ body::before {
 .disc-quick-link:hover svg { transform: translateX(3px); }
 
 /* ── Discussion Detail ── */
-.dt-wrap { width: 100%; max-width: 1280px; position: relative; z-index: 1; margin-top: 20px; padding: 96px 24px 40px; }
+.dt-wrap { width: 100%; max-width: 1200px; position: relative; z-index: 1; margin-top: 20px; padding: 96px 24px 40px; }
 .dt-hero-banner { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 100vw; height: 300px; z-index: -1; pointer-events: none; background-repeat: no-repeat; background-size: cover; }
 .dt-hero-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(249,251,252,0) 45%, #F9FBFC 100%); }
-.dt-layout { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 28px; align-items: start; }
+.dt-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 .dt-main { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
-.dt-info { background: #fff; border-radius: 22px; padding: 0; position: relative; overflow: hidden; animation: fadeUp 0.5s ease-out both; border: 1px solid #edf2f7; }
-.dt-info-content { padding: 36px 32px; position: relative; }
+.dt-info { background: #fff; border-radius: 18px; padding: 0; position: relative; overflow: hidden; animation: fadeUp 0.5s ease-out both; border: 1px solid #e9eef4; box-shadow: 0 1px 3px rgba(20,40,70,0.04); }
+.dt-info-content { padding: 32px 32px 30px; position: relative; }
 .dt-thumb-wrap { position: relative; }
 .dt-thumb { width: 100%; height: 240px; object-fit: cover; display: block; }
 .dt-thumb-wrap::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, #fff); pointer-events: none; }
-.dt-info-label { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; color: #2f6aa0; margin-bottom: 20px; }
-.dt-title { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1.3; letter-spacing: -0.5px; margin-bottom: 16px; }
-.dt-short-divider { width: 40px; height: 3px; border-radius: 3px; background: #1E9DE3; margin-bottom: 20px; }
-.dt-meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
-.dt-meta-tag { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: rgba(255,255,255,0.7); border-radius: 10px; font-size: 0.74rem; color: var(--text); font-weight: 400; backdrop-filter: blur(4px); }
-.dt-meta-tag svg { width: 14px; height: 14px; stroke: #5f7a8f; stroke-width: 1.5; fill: none; }
-.dt-spots-tag { color: #2f6aa0; font-weight: 500; }
-.dt-level-badge { display: inline-block; padding: 4px 14px; background: #edf3f9; color: #4a667f; font-size: 0.72rem; font-weight: 500; border-radius: 8px; letter-spacing: 0.5px; margin-bottom: 20px; }
-.dt-points { }
-.dt-points h3 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
-.dt-points ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.dt-points li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: var(--text); font-weight: 400; line-height: 1.5; opacity: 0; animation: fadeIn 0.5s ease-out forwards; }
-.dt-points li::before { content: ''; width: 8px; height: 8px; min-width: 8px; border-radius: 50%; border: 2px solid #1E9DE3; margin-top: 5px; flex-shrink: 0; }
-.dt-form-panel { background: #fff; border-radius: 20px; padding: 36px 32px; box-shadow: 0 2px 24px rgba(26,46,68,0.06); border: 1px solid var(--border); animation: fadeUp 0.6s ease-out 0.12s both; }
-.dt-form-head { text-align: center; margin-bottom: 28px; }
-.dt-form-head h2 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.3rem; font-weight: 600; color: var(--text); letter-spacing: -0.3px; margin-bottom: 6px; }
-.dt-form-head p { font-size: 0.82rem; color: var(--text-light); font-weight: 300; }
-.dt-submit-btn { background: var(--text) !important; }
-.dt-submit-btn:hover { background: #15394f !important; box-shadow: 0 6px 20px rgba(26,46,68,0.22) !important; }
-.dt-form-panel .success-icon svg { stroke: #1E9DE3; }
+.dt-info-label { display: flex; align-items: center; gap: 9px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; color: #12a150; margin-bottom: 16px; }
+.dt-info-label .disc-pulse { background: #12a150; }
+.dt-title { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--text); line-height: 1.25; letter-spacing: -0.6px; margin-bottom: 18px; }
+.dt-short-divider { width: 40px; height: 3px; border-radius: 3px; background: #3B6FD4; margin-bottom: 20px; }
+.dt-meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.dt-meta-tag { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: #fff; border: 1px solid #e4e9f0; border-radius: 9px; font-size: 0.76rem; color: var(--text); font-weight: 500; }
+.dt-meta-tag svg { width: 14px; height: 14px; stroke: #7d93a8; stroke-width: 1.7; fill: none; }
+.dt-spots-tag { color: #3B6FD4; }
+.dt-level-badge { display: inline-block; padding: 5px 15px; background: #eaf0fc; color: #3B6FD4; font-size: 0.74rem; font-weight: 600; border-radius: 7px; letter-spacing: 0.3px; margin-bottom: 4px; }
+.dt-points { border-top: 1px solid #eef1f5; padding-top: 24px; margin-top: 22px; }
+.dt-points h3 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.72rem; font-weight: 700; color: #3B6FD4; text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 14px; }
+.dt-points ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.dt-points li { display: flex; align-items: center; gap: 13px; background: #fff; border: 1px solid #e8edf3; border-radius: 11px; padding: 14px 16px; font-size: 0.9rem; color: var(--text); font-weight: 500; line-height: 1.4; opacity: 0; animation: fadeIn 0.5s ease-out forwards; }
+.dt-points li::before { content: ''; width: 22px; height: 22px; min-width: 22px; border-radius: 50%; border: none; margin: 0; flex-shrink: 0; background-color: #3B6FD4; background-repeat: no-repeat; background-position: center; background-size: 12px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E"); }
+
+/* ── Right rail: enroll form + why-join ── */
+.dt-rail { display: flex; flex-direction: column; gap: 20px; align-self: start; }
+.dt-form-panel { background: #fff; border-radius: 18px; padding: 30px 30px 26px; box-shadow: 0 1px 3px rgba(20,40,70,0.04); border: 1px solid #e9eef4; animation: fadeUp 0.6s ease-out 0.12s both; }
+.dt-form-head { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+.dt-form-head-icon { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 13px; background: #eaf0fc; }
+.dt-form-head-icon svg { width: 22px; height: 22px; stroke: #3B6FD4; stroke-width: 1.9; fill: none; }
+.dt-form-head-text h2 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text); letter-spacing: -0.4px; margin-bottom: 3px; }
+.dt-form-head-text p { font-size: 0.82rem; color: var(--text-light); font-weight: 400; }
+.dt-phone { display: flex; align-items: stretch; }
+.dt-phone-flag { display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; font-size: 1.05rem; background: #f4f7fa; border: 1.5px solid var(--border); border-right: none; border-radius: var(--radius) 0 0 var(--radius); }
+.dt-phone input { border-radius: 0 var(--radius) var(--radius) 0 !important; }
+.dt-submit-btn { background: #3B6FD4 !important; border-radius: 10px !important; box-shadow: 0 4px 14px rgba(59,111,212,0.28) !important; }
+.dt-submit-btn:hover { background: #2f5cb8 !important; box-shadow: 0 6px 20px rgba(59,111,212,0.34) !important; }
+.dt-form-safe { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 14px; font-size: 0.76rem; font-weight: 400; color: #8ba0b2; }
+.dt-form-safe svg { width: 13px; height: 13px; stroke: #a7b8c6; stroke-width: 2; fill: none; }
+.dt-form-panel .success-icon svg { stroke: #3B6FD4; }
+
+.dt-why { background: #eef3fc; border: 1px solid #e0e9f8; border-radius: 18px; padding: 26px 26px 22px; animation: fadeUp 0.6s ease-out 0.16s both; }
+.dt-why-eyebrow { display: block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; color: #3B6FD4; margin-bottom: 18px; }
+.dt-why-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+.dt-why-list li { display: flex; align-items: flex-start; gap: 13px; }
+.dt-why-icon { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 1px solid #dbe6f7; }
+.dt-why-icon svg { width: 16px; height: 16px; stroke: #3B6FD4; stroke-width: 1.9; fill: none; }
+.dt-why-text { display: flex; flex-direction: column; gap: 2px; font-size: 0.78rem; color: var(--text-light); font-weight: 400; line-height: 1.45; }
+.dt-why-text strong { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.88rem; font-weight: 600; color: var(--text); }
 
 /* ── Completed discussion cards ── */
 .disc-reviews-count { color: #64748b !important; }
@@ -365,31 +385,13 @@ body::before {
 .dt-info-completed .dt-meta-tag svg { stroke: #04D5F3; }
 .dt-joined-tag { color: #0399b3; font-weight: 500; }
 
-/* ── Upcoming discussion detail: "session brief" left panel ── */
-/* Cohesive blue focus identity for the enroll form, matching the homepage theme */
-.dt-form-panel .field:focus-within label { color: #1E8FD0; }
+/* ── Upcoming discussion detail: enroll form focus identity (blue) ── */
+.dt-form-panel .field:focus-within label { color: #3B6FD4; }
 .dt-form-panel .field input:focus,
 .dt-form-panel .field select:focus,
-.dt-form-panel .field textarea:focus { border-color: #1E8FD0; box-shadow: 0 0 0 3px rgba(30,143,208,0.16); }
-
-/* Subtitle directly under the title */
-
-/* Plain inline meta — icon + text, no chips */
-.dt-info:not(.dt-info-completed) .dt-meta-row { gap: 22px; margin-bottom: 18px; }
-.dt-info:not(.dt-info-completed) .dt-meta-tag { background: transparent; border: none; padding: 0; backdrop-filter: none; color: var(--text); font-weight: 500; font-size: 0.82rem; }
-.dt-info:not(.dt-info-completed) .dt-meta-tag svg { stroke: #5f7a8f; }
-.dt-spots-tag { color: #2f6aa0 !important; }
-.dt-spots-tag svg { stroke: #2f6aa0 !important; }
-
-/* "What you'll discuss" as a checklist of rounded rows */
-.dt-points { border-top: 1px solid #eef2f6; padding-top: 22px; margin-top: 10px; }
-.dt-points h3 { margin-bottom: 16px; }
-.dt-points ul { gap: 10px; }
-.dt-points li { background: #f5f6f8; border-radius: 12px; padding: 13px 16px; gap: 12px; align-items: center; font-size: 0.9rem; font-weight: 500; color: var(--text); }
-.dt-points li::before { content: ''; width: 22px; height: 22px; min-width: 22px; margin: 0; border: none; border-radius: 50%; background-color: #1E9DE3; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 12px; }
-
-/* More confident enroll button */
-.dt-submit-btn { box-shadow: 0 4px 14px rgba(26,46,68,0.22); }
+.dt-form-panel .field textarea:focus { border-color: #3B6FD4; box-shadow: 0 0 0 3px rgba(59,111,212,0.15); }
+.dt-phone:focus-within .dt-phone-flag { border-color: #3B6FD4; }
+.dt-spots-tag svg { stroke: #3B6FD4; }
 
 .dt-reviews-panel { position: relative; background: #fff; border-radius: 22px; padding: 30px 30px 12px; box-shadow: 0 2px 24px rgba(26,46,68,0.06); border: 1px solid #e6f9fc; animation: fadeUp 0.6s ease-out 0.12s both; align-self: start; overflow: hidden; }
 .dt-reviews-panel::before { content: '\201C'; position: absolute; top: -28px; right: 14px; font-family: 'Poppins', serif; font-size: 9rem; line-height: 1; color: #eafafc; pointer-events: none; user-select: none; }
@@ -415,21 +417,28 @@ body::before {
 
 /* ── Discussion detail: full-width sections under the hero ── */
 .dt-sections { display: flex; flex-direction: column; gap: 20px; }
-.dt-section { background: #fff; border: 1px solid #edf2f7; border-radius: 22px; padding: 30px 32px; animation: fadeUp 0.55s ease-out both; }
-.dt-section-head { margin-bottom: 20px; }
-.dt-section-eyebrow { display: block; font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #1E9DE3; margin-bottom: 8px; }
-.dt-section-head h2 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.35rem; font-weight: 600; color: var(--text); letter-spacing: -0.4px; line-height: 1.3; }
-.dt-section-note { margin-top: 8px; font-size: 0.78rem; font-weight: 400; color: var(--text-light); }
+.dt-section { background: #fff; border: 1px solid #e9eef4; border-radius: 18px; padding: 28px 30px; box-shadow: 0 1px 3px rgba(20,40,70,0.04); animation: fadeUp 0.55s ease-out both; }
+.dt-section-head { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 22px; }
+.dt-section-icon { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; }
+.dt-section-icon svg { width: 21px; height: 21px; stroke-width: 1.9; fill: none; }
+.dt-ic-learn { background: #efeafb; } .dt-ic-learn svg { stroke: #7c5cd6; }
+.dt-ic-curric { background: #e7effc; } .dt-ic-curric svg { stroke: #3B6FD4; }
+.dt-ic-req { background: #e4f6ec; } .dt-ic-req svg { stroke: #1f9d57; }
+.dt-ic-desc { background: #f3e9fc; } .dt-ic-desc svg { stroke: #9333ea; }
+.dt-section-headings { min-width: 0; padding-top: 1px; }
+.dt-section-eyebrow { display: block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; color: #3B6FD4; margin-bottom: 5px; }
+.dt-section-head h2 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text); letter-spacing: -0.4px; line-height: 1.3; }
+.dt-section-note { margin-top: 6px; font-size: 0.78rem; font-weight: 400; color: var(--text-light); }
 
-/* "What you'll learn?" — two columns of ticked bullets */
+/* "What you'll learn" — two columns of ticked bullets */
 .dt-learn-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 32px; }
 .dt-learn-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 0.88rem; line-height: 1.55; color: var(--text); font-weight: 400; }
-.dt-learn-list svg { width: 18px; height: 18px; min-width: 18px; margin-top: 2px; stroke: #1E9DE3; stroke-width: 2.6; fill: none; }
+.dt-learn-list svg { width: 17px; height: 17px; min-width: 17px; margin-top: 2px; stroke: #3B6FD4; stroke-width: 3; fill: none; }
 
-/* Requirements — a plain dotted list, deliberately quieter than the outcomes */
-.dt-req-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.dt-req-list li { position: relative; padding-left: 20px; font-size: 0.88rem; line-height: 1.6; color: var(--text-light); font-weight: 400; }
-.dt-req-list li::before { content: ''; position: absolute; left: 0; top: 9px; width: 7px; height: 7px; border-radius: 50%; background: #c3d4e0; }
+/* Requirements — a ticked list */
+.dt-req-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 13px; }
+.dt-req-list li { position: relative; padding-left: 26px; font-size: 0.88rem; line-height: 1.6; color: var(--text); font-weight: 400; }
+.dt-req-list li::before { content: ''; position: absolute; left: 0; top: 3px; width: 15px; height: 15px; background-repeat: no-repeat; background-position: center; background-size: contain; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233B6FD4' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E"); }
 
 /* Description */
 .dt-about p { font-size: 0.9rem; line-height: 1.8; color: var(--text-light); font-weight: 300; }
@@ -438,18 +447,18 @@ body::before {
 /* ── Course curriculum accordion — each module is its own separated tab ── */
 .dt-acc { display: flex; flex-direction: column; gap: 12px; }
 .dt-acc-tab { border: 1px solid #e6edf4; border-radius: 16px; background: #fbfcfd; overflow: hidden; transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; }
-.dt-acc-tab:hover { border-color: #cfe4f4; }
-.dt-acc-tab.is-open { background: #fff; border-color: #bfe0f6; box-shadow: 0 4px 18px rgba(30,157,227,0.08); }
+.dt-acc-tab:hover { border-color: #cdddf5; }
+.dt-acc-tab.is-open { background: #fff; border-color: #bcd2f4; box-shadow: 0 4px 18px rgba(59,111,212,0.08); }
 .dt-acc-head { display: flex; align-items: center; gap: 14px; width: 100%; padding: 18px 20px; background: none; border: none; text-align: left; cursor: pointer; font-family: inherit; }
-.dt-acc-num { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #eaf4fc; color: #1E9DE3; font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.3px; transition: background 0.25s ease, color 0.25s ease; }
-.dt-acc-tab.is-open .dt-acc-num { background: #1E9DE3; color: #fff; }
+.dt-acc-num { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #eaf0fc; color: #3B6FD4; font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.3px; transition: background 0.25s ease, color 0.25s ease; }
+.dt-acc-tab.is-open .dt-acc-num { background: #3B6FD4; color: #fff; }
 .dt-acc-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .dt-acc-title { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.94rem; font-weight: 500; color: var(--text); line-height: 1.35; }
 .dt-acc-sum { font-size: 0.78rem; font-weight: 300; color: var(--text-light); line-height: 1.5; }
 .dt-acc-count { flex-shrink: 0; font-size: 0.72rem; font-weight: 500; color: var(--text-light); white-space: nowrap; }
 .dt-acc-chev { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 1px solid #e2ebf2; transition: transform 0.3s ease, border-color 0.25s ease; }
 .dt-acc-chev svg { width: 13px; height: 13px; stroke: #5f7a8f; stroke-width: 2.2; fill: none; }
-.dt-acc-tab.is-open .dt-acc-chev { transform: rotate(180deg); border-color: #bfe0f6; }
+.dt-acc-tab.is-open .dt-acc-chev { transform: rotate(180deg); border-color: #bcd2f4; }
 
 /* 0fr -> 1fr animates the panel open without measuring its height in JS */
 .dt-acc-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.32s cubic-bezier(0.22, 0.61, 0.36, 1); }
@@ -457,28 +466,33 @@ body::before {
 .dt-acc-panel-inner { overflow: hidden; min-height: 0; }
 .dt-acc-items { list-style: none; margin: 0; padding: 0 20px 18px 68px; display: flex; flex-direction: column; gap: 11px; }
 .dt-acc-items li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.86rem; line-height: 1.55; color: var(--text-light); font-weight: 400; }
-.dt-acc-items svg { width: 11px; height: 11px; min-width: 11px; margin-top: 5px; fill: #9fc9e6; stroke: none; }
+.dt-acc-items svg { width: 10px; height: 10px; min-width: 10px; margin-top: 5px; fill: #9db9e8; stroke: none; }
 .dt-acc-blank { padding: 0 20px 18px 68px; font-size: 0.84rem; font-weight: 300; color: var(--text-light); }
 
 /* ── Discussion detail: instructor card above the reviews ── */
-.dt-teacher { margin-top: 20px; background: #fff; border: 1px solid #edf2f7; border-radius: 22px; padding: 30px 32px; animation: fadeUp 0.55s ease-out both; }
-.dt-teacher-body { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 32px; align-items: start; }
-.dt-teacher-side { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 24px 20px; background: #f8fbfd; border: 1px solid #eaf2f8; border-radius: 18px; }
-.dt-teacher-avatar { display: inline-flex; align-items: center; justify-content: center; width: 84px; height: 84px; border-radius: 26px; background: #eaf4fc; border: 1px solid #cfe4f4; font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.7rem; font-weight: 600; letter-spacing: 0.5px; color: #1E9DE3; }
-.dt-teacher-name { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.08rem; font-weight: 600; color: var(--text); letter-spacing: -0.2px; line-height: 1.3; }
-.dt-teacher-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
-.dt-teacher-roles li { font-size: 0.76rem; font-weight: 400; line-height: 1.45; color: var(--text-light); }
-.dt-teacher-roles li + li { padding-top: 7px; border-top: 1px solid #e6eef5; }
-.dt-teacher-bio { font-size: 0.9rem; line-height: 1.8; color: var(--text-light); font-weight: 300; margin: 0; }
+.dt-teacher { margin-top: 20px; background: #fff; border: 1px solid #e9eef4; border-radius: 18px; padding: 28px 30px; box-shadow: 0 1px 3px rgba(20,40,70,0.04); animation: fadeUp 0.55s ease-out both; }
+.dt-teacher .dt-section-head { display: block; margin-bottom: 22px; }
+.dt-teacher .dt-section-eyebrow { color: #3B6FD4; }
+.dt-teacher-body { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 36px; align-items: start; }
+.dt-teacher-side { display: flex; align-items: flex-start; gap: 16px; }
+.dt-teacher-photo { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 96px; height: 118px; border-radius: 14px; background: linear-gradient(160deg, #eaf0fc, #dbe6f8); border: 1px solid #d3e0f4; font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.6rem; font-weight: 600; letter-spacing: 0.5px; color: #3B6FD4; }
+.dt-teacher-idblock { min-width: 0; padding-top: 4px; }
+.dt-teacher-name { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 1.02rem; font-weight: 700; color: var(--text); letter-spacing: -0.2px; line-height: 1.3; margin-bottom: 4px; }
+.dt-teacher-role { font-size: 0.78rem; font-weight: 400; line-height: 1.4; color: var(--text-light); margin-bottom: 12px; }
+.dt-teacher-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.dt-teacher-roles li { position: relative; padding-left: 15px; font-size: 0.75rem; font-weight: 400; line-height: 1.4; color: #3B6FD4; }
+.dt-teacher-roles li::before { content: ''; position: absolute; left: 0; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: #9db9e8; }
+.dt-teacher-bio { font-size: 0.88rem; line-height: 1.8; color: var(--text-light); font-weight: 400; margin: 0; }
 .dt-teacher-skills { margin-top: 22px; padding-top: 20px; border-top: 1px solid #eef2f6; }
-.dt-teacher-skills h4 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 13px; }
+.dt-teacher-skills h4 { font-family: 'Poppins', 'Vazirmatn', sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 13px; }
 .dt-teacher-chips { display: flex; flex-wrap: wrap; gap: 9px; }
-.dt-teacher-chip { display: inline-block; padding: 7px 15px; background: #eaf4fc; border: 1px solid #d8eaf8; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: #2f6aa0; }
+.dt-teacher-chip { display: inline-block; padding: 7px 15px; background: #eaf0fc; border: 1px solid #d6e3f8; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: #3B6FD4; }
 
 /* ── Discussion detail: review slider at the foot of the page ── */
 .dt-revs { margin-top: 20px; background: #fff; border: 1px solid #e6f9fc; border-radius: 22px; padding: 30px 32px; animation: fadeUp 0.55s ease-out both; }
 .dt-revs-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
-.dt-revs .dt-section-eyebrow { color: #0399b3; }
+.dt-revs .dt-section-head { display: block; margin-bottom: 22px; }
+.dt-revs .dt-section-eyebrow { color: #3B6FD4; }
 .dt-revs-nav { display: flex; gap: 8px; flex-shrink: 0; }
 .dt-revs-nav button { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 1px solid #d8eef4; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease; }
 .dt-revs-nav button svg { width: 16px; height: 16px; stroke: #0399b3; stroke-width: 2.2; fill: none; }
@@ -519,18 +533,14 @@ body::before {
 @media (max-width: 900px) {
   .dt-learn-list { grid-template-columns: 1fr; }
   .dt-teacher-body { grid-template-columns: 1fr; gap: 24px; }
-  .dt-teacher-side { flex-direction: row; align-items: center; text-align: left; flex-wrap: wrap; gap: 8px 18px; }
-  .dt-teacher-side .dt-teacher-name { width: calc(100% - 102px); }
-  .dt-teacher-roles { width: 100%; flex-direction: row; flex-wrap: wrap; gap: 8px; }
-  .dt-teacher-roles li + li { padding-top: 0; border-top: none; }
-  .dt-teacher-roles li { padding: 5px 12px; background: #fff; border: 1px solid #e6eef5; border-radius: 20px; }
 }
 @media (max-width: 560px) {
-  .dt-section, .dt-revs, .dt-teacher { padding: 24px 20px; border-radius: 18px; }
-  .dt-teacher-side { padding: 18px 16px; }
-  .dt-teacher-avatar { width: 64px; height: 64px; border-radius: 20px; font-size: 1.3rem; }
-  .dt-teacher-side .dt-teacher-name { width: calc(100% - 82px); }
-  .dt-section-head h2 { font-size: 1.15rem; }
+  .dt-section, .dt-revs, .dt-teacher { padding: 22px 18px; border-radius: 16px; }
+  .dt-section-head { gap: 12px; }
+  .dt-section-icon { width: 38px; height: 38px; border-radius: 10px; }
+  .dt-teacher-photo { width: 78px; height: 96px; font-size: 1.3rem; }
+  .dt-form-panel, .dt-why { padding: 22px 18px; }
+  .dt-section-head h2, .dt-form-head-text h2 { font-size: 1.15rem; }
   .dt-acc-head { padding: 15px 14px; gap: 11px; }
   .dt-acc-num { width: 30px; height: 30px; border-radius: 9px; font-size: 0.72rem; }
   .dt-acc-count { display: none; }
