@@ -1131,7 +1131,7 @@ function HomeContent() {
             <div className="dt-hero-banner" aria-hidden="true" style={{ backgroundImage: discussionGradient(activeDisc.id) }}></div>
             <button className="back-btn" onClick={() => { setView('discussions'); setEnrollSuccess(false); window.history.pushState(null, '', '/discussions'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
               <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Discussions
+              Back to discussions
             </button>
             <div className={`dt-layout${isCompletedDetail ? ' dt-layout-completed' : ''}`}>
               <div className="dt-main">
@@ -1207,8 +1207,13 @@ function HomeContent() {
                 {learn.length > 0 && (
                   <section className="dt-section">
                     <div className="dt-section-head">
-                      <span className="dt-section-eyebrow">Outcomes</span>
-                      <h2>What you&apos;ll learn?</h2>
+                      <span className="dt-section-icon dt-ic-learn" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                      </span>
+                      <div className="dt-section-headings">
+                        <span className="dt-section-eyebrow">Outcomes</span>
+                        <h2>What you&apos;ll learn</h2>
+                      </div>
                     </div>
                     <ul className="dt-learn-list">
                       {learn.map((l, i) => (
@@ -1224,13 +1229,18 @@ function HomeContent() {
                 {curriculum.length > 0 && (
                   <section className="dt-section">
                     <div className="dt-section-head">
-                      <span className="dt-section-eyebrow">Curriculum</span>
-                      <h2>Course curriculum</h2>
-                      <p className="dt-section-note">
-                        {curriculum.length} {curriculum.length === 1 ? 'module' : 'modules'}
-                        {lessonCount > 0 && ` \u00b7 ${lessonCount} ${lessonCount === 1 ? 'lesson' : 'lessons'}`}
-                        {` \u00b7 ${activeDisc.duration}`}
-                      </p>
+                      <span className="dt-section-icon dt-ic-curric" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" strokeLinecap="round" strokeLinejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </span>
+                      <div className="dt-section-headings">
+                        <span className="dt-section-eyebrow">Curriculum</span>
+                        <h2>Course curriculum</h2>
+                        <p className="dt-section-note">
+                          {curriculum.length} {curriculum.length === 1 ? 'module' : 'modules'}
+                          {lessonCount > 0 && ` \u00b7 ${lessonCount} ${lessonCount === 1 ? 'lesson' : 'lessons'}`}
+                          {` \u00b7 ${activeDisc.duration}`}
+                        </p>
+                      </div>
                     </div>
                     <div className="dt-acc">
                       {curriculum.map((m, i) => {
@@ -1284,8 +1294,13 @@ function HomeContent() {
                 {requirements.length > 0 && (
                   <section className="dt-section">
                     <div className="dt-section-head">
-                      <span className="dt-section-eyebrow">Before you join</span>
-                      <h2>Requirements</h2>
+                      <span className="dt-section-icon dt-ic-req" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </span>
+                      <div className="dt-section-headings">
+                        <span className="dt-section-eyebrow">Before you join</span>
+                        <h2>Requirements</h2>
+                      </div>
                     </div>
                     <ul className="dt-req-list">
                       {requirements.map((r, i) => (
@@ -1298,8 +1313,13 @@ function HomeContent() {
                 {activeDisc.description && (
                   <section className="dt-section">
                     <div className="dt-section-head">
-                      <span className="dt-section-eyebrow">Description</span>
-                      <h2>About this discussion</h2>
+                      <span className="dt-section-icon dt-ic-desc" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </span>
+                      <div className="dt-section-headings">
+                        <span className="dt-section-eyebrow">Description</span>
+                        <h2>About this discussion</h2>
+                      </div>
                     </div>
                     <div className="dt-about">
                       {activeDisc.description.split(/\n+/).filter(Boolean).map((para, i) => (
@@ -1313,6 +1333,7 @@ function HomeContent() {
               </div>
 
               {!isCompletedDetail && (
+              <div className="dt-rail">
               <div className="dt-form-panel">
                 {enrollSuccess ? (
                   <div className="success-message">
@@ -1326,8 +1347,13 @@ function HomeContent() {
                 ) : (
                   <>
                     <div className="dt-form-head">
-                      <h2>Enroll in Discussion</h2>
-                      <p>You can fill the form in <span className="farsi-green">Farsi</span></p>
+                      <span className="dt-form-head-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </span>
+                      <div className="dt-form-head-text">
+                        <h2>Enroll in Discussion</h2>
+                        <p>You can fill the form in <span className="farsi-green">Farsi</span></p>
+                      </div>
                     </div>
                     <form onSubmit={handleEnroll} noValidate>
                       <div className="form-row">
@@ -1350,7 +1376,13 @@ function HomeContent() {
                         </div>
                       </div>
                       <div className="field"><label>Email</label><input type="email" name="email" placeholder="jane@example.com" required /></div>
-                      <div className="field"><label>Phone Number</label><input type="tel" name="phone" placeholder="+98 912 345 6789" required /></div>
+                      <div className="field">
+                        <label>Phone Number</label>
+                        <div className="dt-phone">
+                          <span className="dt-phone-flag" aria-hidden="true">🇮🇷</span>
+                          <input type="tel" name="phone" placeholder="+98 912 345 6789" required />
+                        </div>
+                      </div>
                       <div className="field">
                         <label>Have you joined a group discussion before?</label>
                         <select name="priorExperience" required defaultValue="">
@@ -1361,9 +1393,36 @@ function HomeContent() {
                       </div>
                       <div className="field"><label>What do you hope to gain from this discussion?</label><textarea name="goals" placeholder="e.g. practice speaking, build confidence, learn new vocabulary..." required /></div>
                       <button type="submit" className="submit-btn dt-submit-btn">Enroll Now</button>
+                      <p className="dt-form-safe">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Your information is safe with us.
+                      </p>
                     </form>
                   </>
                 )}
+              </div>
+
+              <aside className="dt-why">
+                <span className="dt-why-eyebrow">Why join a discussion?</span>
+                <ul className="dt-why-list">
+                  <li>
+                    <span className="dt-why-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+                    <span className="dt-why-text"><strong>Practice real-life English</strong>In realistic meeting scenarios</span>
+                  </li>
+                  <li>
+                    <span className="dt-why-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+                    <span className="dt-why-text"><strong>Small group learning</strong>Personal attention &amp; more speaking</span>
+                  </li>
+                  <li>
+                    <span className="dt-why-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="7" r="4"/></svg></span>
+                    <span className="dt-why-text"><strong>Expert feedback</strong>From experienced instructors</span>
+                  </li>
+                  <li>
+                    <span className="dt-why-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" strokeLinejoin="round"/></svg></span>
+                    <span className="dt-why-text"><strong>Instant takeaways</strong>Use it in your next meeting</span>
+                  </li>
+                </ul>
+              </aside>
               </div>
               )}
             </div>
@@ -1375,13 +1434,16 @@ function HomeContent() {
               </div>
               <div className="dt-teacher-body">
                 <aside className="dt-teacher-side">
-                  <div className="dt-teacher-avatar" aria-hidden="true">MF</div>
-                  <h3 className="dt-teacher-name">Mahdieh Fahimpour</h3>
-                  <ul className="dt-teacher-roles">
-                    {TEACHER_ROLES.map((role) => (
-                      <li key={role}>{role}</li>
-                    ))}
-                  </ul>
+                  <div className="dt-teacher-photo" aria-hidden="true">MF</div>
+                  <div className="dt-teacher-idblock">
+                    <h3 className="dt-teacher-name">Mahdieh Fahimpour</h3>
+                    <p className="dt-teacher-role">{TEACHER_ROLES[0]}</p>
+                    <ul className="dt-teacher-roles">
+                      {TEACHER_ROLES.slice(1).map((role) => (
+                        <li key={role}>{role}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </aside>
                 <div className="dt-teacher-main">
                   <p className="dt-teacher-bio">
