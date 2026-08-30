@@ -1119,6 +1119,7 @@ function HomeContent() {
               Discussions
             </button>
             <div className={`dt-layout${isCompletedDetail ? ' dt-layout-completed' : ''}`}>
+              <div className="dt-main">
               <div className={`dt-info${isCompletedDetail ? ' dt-info-completed' : ''}`}>
                 {activeDisc.thumbnail && <div className="dt-thumb-wrap"><img src={activeDisc.thumbnail} alt="" className="dt-thumb" /></div>}
                 <div className="dt-info-content">
@@ -1186,63 +1187,7 @@ function HomeContent() {
                   )}
                 </div>
               </div>
-              {!isCompletedDetail && (
-              <div className="dt-form-panel">
-                {enrollSuccess ? (
-                  <div className="success-message">
-                    <div className="success-icon" style={{ background: '#fdeaf4' }}>
-                      <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </div>
-                    <h2>You&apos;re Enrolled</h2>
-                    <p>We&apos;ll send you the session details soon.</p>
-                    <button className="another-btn" onClick={() => { setEnrollSuccess(false); showView('discussions'); }}>Back to Discussions</button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="dt-form-head">
-                      <h2>Enroll in Discussion</h2>
-                      <p>You can fill the form in <span className="farsi-green">Farsi</span></p>
-                    </div>
-                    <form onSubmit={handleEnroll} noValidate>
-                      <div className="form-row">
-                        <div className="field"><label>First Name</label><input type="text" name="firstName" placeholder="Jane" required /></div>
-                        <div className="field"><label>Last Name</label><input type="text" name="lastName" placeholder="Doe" required /></div>
-                      </div>
-                      <div className="form-row">
-                        <div className="field"><label>Age</label><input type="number" name="age" placeholder="25" min={5} max={120} required /></div>
-                        <div className="field">
-                          <label>English Level</label>
-                          <select name="englishLevel" required defaultValue="">
-                            <option value="" disabled>Select your level</option>
-                            <option value="A1">A1 - Beginner</option>
-                            <option value="A2">A2 - Elementary</option>
-                            <option value="B1">B1 - Intermediate</option>
-                            <option value="B2">B2 - Upper Intermediate</option>
-                            <option value="C1">C1 - Advanced</option>
-                            <option value="C2">C2 - Proficient</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="field"><label>Email</label><input type="email" name="email" placeholder="jane@example.com" required /></div>
-                      <div className="field"><label>Phone Number</label><input type="tel" name="phone" placeholder="+98 912 345 6789" required /></div>
-                      <div className="field">
-                        <label>Have you joined a group discussion before?</label>
-                        <select name="priorExperience" required defaultValue="">
-                          <option value="" disabled>Select an option</option>
-                          <option value="yes">Yes</option>
-                          <option value="no">No, this is my first time</option>
-                        </select>
-                      </div>
-                      <div className="field"><label>What do you hope to gain from this discussion?</label><textarea name="goals" placeholder="e.g. practice speaking, build confidence, learn new vocabulary..." required /></div>
-                      <button type="submit" className="submit-btn dt-submit-btn">Enroll Now</button>
-                    </form>
-                  </>
-                )}
-              </div>
-              )}
-            </div>
-
-            {(learn.length > 0 || curriculum.length > 0 || requirements.length > 0 || activeDisc.description) && (
+              {(learn.length > 0 || curriculum.length > 0 || requirements.length > 0 || activeDisc.description) && (
               <div className="dt-sections">
                 {learn.length > 0 && (
                   <section className="dt-section">
@@ -1350,6 +1295,63 @@ function HomeContent() {
                 )}
               </div>
             )}
+              </div>
+
+              {!isCompletedDetail && (
+              <div className="dt-form-panel">
+                {enrollSuccess ? (
+                  <div className="success-message">
+                    <div className="success-icon" style={{ background: '#fdeaf4' }}>
+                      <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <h2>You&apos;re Enrolled</h2>
+                    <p>We&apos;ll send you the session details soon.</p>
+                    <button className="another-btn" onClick={() => { setEnrollSuccess(false); showView('discussions'); }}>Back to Discussions</button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="dt-form-head">
+                      <h2>Enroll in Discussion</h2>
+                      <p>You can fill the form in <span className="farsi-green">Farsi</span></p>
+                    </div>
+                    <form onSubmit={handleEnroll} noValidate>
+                      <div className="form-row">
+                        <div className="field"><label>First Name</label><input type="text" name="firstName" placeholder="Jane" required /></div>
+                        <div className="field"><label>Last Name</label><input type="text" name="lastName" placeholder="Doe" required /></div>
+                      </div>
+                      <div className="form-row">
+                        <div className="field"><label>Age</label><input type="number" name="age" placeholder="25" min={5} max={120} required /></div>
+                        <div className="field">
+                          <label>English Level</label>
+                          <select name="englishLevel" required defaultValue="">
+                            <option value="" disabled>Select your level</option>
+                            <option value="A1">A1 - Beginner</option>
+                            <option value="A2">A2 - Elementary</option>
+                            <option value="B1">B1 - Intermediate</option>
+                            <option value="B2">B2 - Upper Intermediate</option>
+                            <option value="C1">C1 - Advanced</option>
+                            <option value="C2">C2 - Proficient</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="field"><label>Email</label><input type="email" name="email" placeholder="jane@example.com" required /></div>
+                      <div className="field"><label>Phone Number</label><input type="tel" name="phone" placeholder="+98 912 345 6789" required /></div>
+                      <div className="field">
+                        <label>Have you joined a group discussion before?</label>
+                        <select name="priorExperience" required defaultValue="">
+                          <option value="" disabled>Select an option</option>
+                          <option value="yes">Yes</option>
+                          <option value="no">No, this is my first time</option>
+                        </select>
+                      </div>
+                      <div className="field"><label>What do you hope to gain from this discussion?</label><textarea name="goals" placeholder="e.g. practice speaking, build confidence, learn new vocabulary..." required /></div>
+                      <button type="submit" className="submit-btn dt-submit-btn">Enroll Now</button>
+                    </form>
+                  </>
+                )}
+              </div>
+              )}
+            </div>
 
             <section className="dt-teacher">
               <div className="dt-section-head">

@@ -318,6 +318,7 @@ body::before {
 /* ── Discussion Detail ── */
 .dt-wrap { width: 100%; max-width: 1280px; position: relative; z-index: 1; margin-top: 20px; padding: 0 24px 40px; }
 .dt-layout { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 28px; align-items: start; }
+.dt-main { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 .dt-info { background: #fff; border-radius: 22px; padding: 0; position: relative; overflow: hidden; animation: fadeUp 0.5s ease-out both; border: 1px solid #edf2f7; }
 .dt-info-content { padding: 36px 32px; position: relative; }
 .dt-thumb-wrap { position: relative; }
@@ -411,7 +412,7 @@ body::before {
 .dt-rev-empty p { font-size: 0.84rem; font-weight: 300; line-height: 1.6; max-width: 260px; }
 
 /* ── Discussion detail: full-width sections under the hero ── */
-.dt-sections { display: flex; flex-direction: column; gap: 20px; margin-top: 24px; }
+.dt-sections { display: flex; flex-direction: column; gap: 20px; }
 .dt-section { background: #fff; border: 1px solid #edf2f7; border-radius: 22px; padding: 30px 32px; animation: fadeUp 0.55s ease-out both; }
 .dt-section-head { margin-bottom: 20px; }
 .dt-section-eyebrow { display: block; font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #1E9DE3; margin-bottom: 8px; }
